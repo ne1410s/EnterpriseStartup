@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace DemoLibrary;
+namespace EnterpriseStartup;
 
 /// <summary>
 /// A class.

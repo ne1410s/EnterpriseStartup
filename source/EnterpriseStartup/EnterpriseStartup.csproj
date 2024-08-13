@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>Paul Jones</Authors>
     <Company>ne1410s</Company>
-    <Description>DESCRIPTION HERE</Description>
+    <Description>Library for getting ASP.NET apps off the ground!</Description>
     <PackageTags>space separated keywords</PackageTags>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <IncludeSymbols>True</IncludeSymbols>
@@ -11,9 +11,9 @@
     <PackageIcon>ICON.png</PackageIcon>
     <PackageIconUrl>ICON.png</PackageIconUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageProjectUrl>https://github.com/ne1410s/DemoLibrary</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/ne1410s/EnterpriseStartup</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/ne1410s/DemoLibrary</RepositoryUrl>
+    <RepositoryUrl>https://github.com/ne1410s/EnterpriseStartup</RepositoryUrl>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Title>$(AssemblyName)</Title>
