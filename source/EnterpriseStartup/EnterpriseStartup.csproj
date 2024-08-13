@@ -7,20 +7,23 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <IncludeSymbols>True</IncludeSymbols>
     <Nullable>enable</Nullable>
+    <PackageIcon>ICON.png</PackageIcon>
+    <PackageIconUrl>ICON.png</PackageIconUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/ne1410s/EnterpriseStartup</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>Enterprise Startup Extensions OpenTelemetry</PackageTags>
     <RepositoryUrl>https://github.com/ne1410s/EnterpriseStartup</RepositoryUrl>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <TargetFramework>net6.0</TargetFramework>
     <Title>$(AssemblyName)</Title>
-    <PackageTags>Startup; Extensions;</PackageTags>
     <VersionPrefix>1.0.0</VersionPrefix>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="../README.md" Pack="true" PackagePath="\" Visible="false" />
-    <None Include="../LICENSE" Pack="true" PackagePath="\" Visible="false" />
+    <None Include="../../README.md" Pack="true" PackagePath="/" Visible="false" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="/" Visible="false" />
+    <None Include="../../ICON.png" Pack="true" PackagePath="/" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
