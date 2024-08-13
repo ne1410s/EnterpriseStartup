@@ -1,10 +1,11 @@
 # Enterprise Startup
 
-[![Coverage Status](https://coveralls.io/repos/github/ne1410s/DemoLibrary/badge.svg?branch=main)](https://coveralls.io/github/ne1410s/DemoLibrary?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/ne1410s/EnterpriseStartup/badge.svg?branch=main)](https://coveralls.io/github/ne1410s/EnterpriseStartup?branch=main)
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/161506d0d7d947a8999892f5bfad673d)](https://app.codacy.com/gh/ne1410s/DemoLibrary/dashboard)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/a29359ac9f90425892c9fa92e6079585)](https://app.codacy.com/gh/ne1410s/EnterpriseStartup/dashboard)
 
-[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fne1410s%2FDemoLibrary%2Fmain)](https://dashboard.stryker-mutator.io/reports/github.com/ne1410s/DemoLibrary/main)
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fne1410s%2FEnterpriseStartup%2Fmain)](https://dashboard.stryker-mutator.io/reports/github.com/ne1410s/EnterpriseStartup/main)
+
 
 ## Overview
 This is a library designed to help get started with enterprise ASP.NET apps!
