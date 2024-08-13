@@ -1,4 +1,4 @@
-# Demo Library
+# Enterprise Startup
 
 [![Coverage Status](https://coveralls.io/repos/github/ne1410s/DemoLibrary/badge.svg?branch=main)](https://coveralls.io/github/ne1410s/DemoLibrary?branch=main)
 
@@ -7,7 +7,7 @@
 [![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fne1410s%2FDemoLibrary%2Fmain)](https://dashboard.stryker-mutator.io/reports/github.com/ne1410s/DemoLibrary/main)
 
 ## Overview
-This is a demo library designed to help get started!
+This is a library designed to help get started with enterprise ASP.NET apps!
 
 ## Notes
 ### Commands

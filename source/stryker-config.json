@@ -1,5 +1,12 @@
 {
   "stryker-config": {
+    "mutate": [
+      "!**/EnterpriseStartup/Extensions/*Extensions.cs"
+    ],
+    "ignore-methods": [
+      "Dispose",
+      "GC.SuppressFinalize"
+    ],
     "thresholds": {
       "high": 100,
       "low": 100,
