@@ -20,7 +20,7 @@ public static class DiscoveryExtensions
     /// <param name="services">The services.</param>
     /// <returns>The original parameter, for chainable commands.</returns>
     public static IServiceCollection AddEnterpriseDiscovery(
-    this IServiceCollection services)
+        this IServiceCollection services)
     {
         return services
             .AddEndpointsApiExplorer()
