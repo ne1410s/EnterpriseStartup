@@ -6,8 +6,6 @@ namespace EnterpriseStartup.Extensions;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using EnterpriseStartup.Messaging.Abstractions.Consumer;
-using EnterpriseStartup.Messaging.Abstractions.Producer;
 using RabbitMQ.Client;
 
 /// <summary>
@@ -21,7 +19,7 @@ public static class MqExtensions
     /// <param name="services">The services.</param>
     /// <param name="configuration">The configuration.</param>
     /// <returns>The original parameter, for chainable commands.</returns>
-    public static IServiceCollection AddEnterpriseMq(
+    public static MqTopologyBuilder AddEnterpriseMq(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -35,34 +33,7 @@ public static class MqExtensions
             DispatchConsumersAsync = true,
         };
 
-        return services.AddSingleton<IConnectionFactory>(_ => factory);
-    }
-
-    /// <summary>
-    /// Adds a mq consumer service.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <typeparam name="T">The consumer type.</typeparam>
-    /// <returns>The original parameter, for chainable commands.</returns>
-    public static IServiceCollection AddMqConsumer<T>(
-        this IServiceCollection services)
-        where T : MqConsumerBase
-    {
-        return services
-            .AddScoped<T>()
-            .AddHostedService<ConsumerHostingService<T>>();
-    }
-
-    /// <summary>
-    /// Adds a mq producer.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <typeparam name="T">The producer type.</typeparam>
-    /// <returns>The original parameter, for chainable commands.</returns>
-    public static IServiceCollection AddMqProducer<T>(
-        this IServiceCollection services)
-        where T : class, IMqProducer
-    {
-        return services.AddScoped<T>();
+        services.AddSingleton<IConnectionFactory>(_ => factory);
+        return new MqTopologyBuilder(services);
     }
 }

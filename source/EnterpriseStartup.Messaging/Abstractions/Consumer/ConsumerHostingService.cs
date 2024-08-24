@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Hosted singleton that allows for scoped consumers.
@@ -24,10 +25,23 @@ public sealed class ConsumerHostingService<TConsumer> : IHostedService, IDisposa
     /// Initializes a new instance of the <see cref="ConsumerHostingService{TConsumer}"/> class.
     /// </summary>
     /// <param name="services">The services.</param>
-    public ConsumerHostingService(IServiceProvider services)
+    /// <param name="loggerFactory">The logger factory.</param>
+    public ConsumerHostingService(IServiceProvider services, ILoggerFactory loggerFactory)
     {
+        var consumerType = this.GetType().GetGenericArguments()[0];
+        var loggerCategory = $"{nameof(ConsumerHostingService<TConsumer>)}<{consumerType.Name}>";
+        var logger = loggerFactory?.CreateLogger(loggerCategory)!;
         this.originalScope = services.CreateScope();
-        this.consumer = this.originalScope.ServiceProvider.GetRequiredService<TConsumer>();
+        var sp = this.originalScope.ServiceProvider;
+        try
+        {
+            this.consumer = sp.GetRequiredService<TConsumer>();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to start consumer hosting service");
+            this.consumer = null!;
+        }
     }
 
     /// <inheritdoc/>
@@ -39,7 +53,12 @@ public sealed class ConsumerHostingService<TConsumer> : IHostedService, IDisposa
 
     /// <inheritdoc/>
     public async Task StartAsync(CancellationToken cancellationToken)
-        => await this.consumer.StartAsync(cancellationToken);
+    {
+        if (this.consumer != null)
+        {
+            await this.consumer.StartAsync(cancellationToken);
+        }
+    }
 
     /// <inheritdoc/>
     public async Task StopAsync(CancellationToken cancellationToken)
