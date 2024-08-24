@@ -14,7 +14,7 @@ using RabbitMQ.Client;
 public static class MqExtensions
 {
     /// <summary>
-    /// Adds the enterprise mq feature.
+    /// Adds the enterprise mq feature. This registers mq for startup and readiness health checks.
     /// </summary>
     /// <param name="services">The services.</param>
     /// <param name="configuration">The configuration.</param>
@@ -33,7 +33,10 @@ public static class MqExtensions
             DispatchConsumersAsync = true,
         };
 
-        services.AddSingleton<IConnectionFactory>(_ => factory);
+        services.AddSingleton<IConnectionFactory>(_ => factory)
+            .AddHealthChecks()
+            .AddRabbitMQ();
+
         return new MqTopologyBuilder(services);
     }
 }
