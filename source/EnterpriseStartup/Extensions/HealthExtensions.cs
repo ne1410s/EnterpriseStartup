@@ -14,6 +14,11 @@ using Microsoft.Extensions.DependencyInjection;
 public static class HealthExtensions
 {
     /// <summary>
+    /// A health check tag that can be used to omit the dependency from readiness checks.
+    /// </summary>
+    public const string NonVital = "non-vital";
+
+    /// <summary>
     /// Adds the enterprise health feature.
     /// </summary>
     /// <param name="services">The services.</param>
