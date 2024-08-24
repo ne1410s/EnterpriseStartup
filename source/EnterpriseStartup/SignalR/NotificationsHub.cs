@@ -18,21 +18,21 @@ public class NotificationsHub : Hub
     /// <summary>
     /// Gets the connected users.
     /// </summary>
-    public static readonly ConcurrentDictionary<string, List<string>> ConnectedUsers = [];
+    public static readonly ConcurrentDictionary<Guid, List<string>> ConnectedUsers = [];
 
     /// <inheritdoc/>
     public override async Task OnConnectedAsync()
     {
         await Task.CompletedTask;
-        if (this.AuthenticUser(out var username, out var connectionId))
+        if (this.AuthenticUser(out var userId, out var connectionId))
         {
-            if (!ConnectedUsers.TryGetValue(username, out _))
+            if (!ConnectedUsers.TryGetValue(userId, out _))
             {
-                ConnectedUsers[username] = [connectionId];
+                ConnectedUsers[userId] = [connectionId];
             }
             else
             {
-                ConnectedUsers[username].Add(connectionId);
+                ConnectedUsers[userId].Add(connectionId);
             }
         }
         else
@@ -45,20 +45,20 @@ public class NotificationsHub : Hub
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         await Task.CompletedTask;
-        if (this.AuthenticUser(out var username, out var connectionId)
-            && ConnectedUsers.TryGetValue(username, out _))
+        if (this.AuthenticUser(out var userId, out var connectionId)
+            && ConnectedUsers.TryGetValue(userId, out _))
         {
-            ConnectedUsers[username].Remove(connectionId);
-            if (ConnectedUsers[username].Count == 0)
+            ConnectedUsers[userId].Remove(connectionId);
+            if (ConnectedUsers[userId].Count == 0)
             {
-                ConnectedUsers.Remove(username, out _);
+                ConnectedUsers.Remove(userId, out _);
             }
         }
     }
 
-    private bool AuthenticUser(out string username, out string connectionId)
+    private bool AuthenticUser(out Guid userId, out string connectionId)
     {
-        username = null!;
+        userId = Guid.Empty;
         connectionId = null!;
 
         if (this.Context.User?.Identity?.IsAuthenticated != true)
@@ -67,7 +67,9 @@ public class NotificationsHub : Hub
         }
 
         connectionId = this.Context.ConnectionId;
-        username = this.Context.User.Identity.Name!;
+
+        // TODO: Get user id from OID/claim
+        userId = Guid.NewGuid();
         return true;
     }
 }

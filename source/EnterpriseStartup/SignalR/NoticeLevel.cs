@@ -12,15 +12,20 @@ public enum NoticeLevel
     /// <summary>
     /// Information notices.
     /// </summary>
-    Information = 0,
+    Neutral = 0,
 
     /// <summary>
-    /// Warning notices.
+    /// Success notices.
     /// </summary>
-    Warning = 1,
+    Success = 1,
 
     /// <summary>
-    /// Error notices.
+    /// Failure notices.
     /// </summary>
-    Error = 2,
+    Failure = 2,
+
+    /// <summary>
+    /// System errors.
+    /// </summary>
+    SystemError = 3,
 }

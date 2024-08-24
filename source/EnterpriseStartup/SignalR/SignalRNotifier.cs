@@ -4,7 +4,7 @@
 
 namespace EnterpriseStartup.SignalR;
 
-using System.Security.Claims;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
@@ -12,13 +12,10 @@ using Microsoft.AspNetCore.SignalR;
 public class SignalRNotifier(IHubContext<NotificationsHub> hubContext) : INotifier
 {
     /// <inheritdoc/>
-    public async Task Notify(ClaimsPrincipal user, NoticeLevel level, string message)
+    public async Task Notify(Guid userId, NoticeLevel level, string message)
     {
-        if (user?.Identity?.IsAuthenticated == true)
-        {
-            var connectionIds = NotificationsHub.ConnectedUsers[user.Identity.Name!];
-            var clients = hubContext.Clients.Clients(connectionIds);
-            await clients.SendAsync("ReceiveMessage", level, message);
-        }
+        var connectionIds = NotificationsHub.ConnectedUsers[userId];
+        var clients = hubContext.Clients.Clients(connectionIds);
+        await clients.SendAsync("ReceiveMessage", level, message);
     }
 }
