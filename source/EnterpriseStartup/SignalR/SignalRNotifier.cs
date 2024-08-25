@@ -4,7 +4,6 @@
 
 namespace EnterpriseStartup.SignalR;
 
-using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
@@ -12,7 +11,7 @@ using Microsoft.AspNetCore.SignalR;
 public class SignalRNotifier(IHubContext<NotificationsHub> hubContext) : INotifier
 {
     /// <inheritdoc/>
-    public async Task Notify(Guid userId, NoticeLevel level, string message)
+    public async Task Notify(string userId, NoticeLevel level, string message)
     {
         var connectionIds = NotificationsHub.ConnectedUsers[userId];
         var clients = hubContext.Clients.Clients(connectionIds);

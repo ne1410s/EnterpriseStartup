@@ -4,7 +4,6 @@
 
 namespace EnterpriseStartup.SignalR;
 
-using System;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -19,5 +18,5 @@ public interface INotifier
     /// <param name="level">The notice level.</param>
     /// <param name="message">The message.</param>
     /// <returns>Async task.</returns>
-    public Task Notify(Guid userId, NoticeLevel level, string message);
+    public Task Notify(string userId, NoticeLevel level, string message);
 }

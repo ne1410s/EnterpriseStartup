@@ -8,6 +8,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EnterpriseStartup.Auth;
 using Microsoft.AspNetCore.SignalR;
 
 /// <summary>
@@ -16,9 +17,9 @@ using Microsoft.AspNetCore.SignalR;
 public class NotificationsHub : Hub
 {
     /// <summary>
-    /// Gets the connected users.
+    /// Connected users, by user id.
     /// </summary>
-    public static readonly ConcurrentDictionary<Guid, List<string>> ConnectedUsers = [];
+    public static readonly ConcurrentDictionary<string, List<string>> ConnectedUsers = [];
 
     /// <inheritdoc/>
     public override async Task OnConnectedAsync()
@@ -56,20 +57,19 @@ public class NotificationsHub : Hub
         }
     }
 
-    private bool AuthenticUser(out Guid userId, out string connectionId)
+    private bool AuthenticUser(out string userId, out string connectionId)
     {
-        userId = Guid.Empty;
+        userId = null!;
         connectionId = null!;
 
-        if (this.Context.User?.Identity?.IsAuthenticated != true)
+        var principal = this.Context.User;
+        if (principal?.Identity?.IsAuthenticated != true)
         {
             return false;
         }
 
+        userId = principal.ToUser().Id;
         connectionId = this.Context.ConnectionId;
-
-        // TODO: Get user id from OID/claim
-        userId = Guid.NewGuid();
         return true;
     }
 }
