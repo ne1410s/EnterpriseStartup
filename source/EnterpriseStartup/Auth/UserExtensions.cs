@@ -22,7 +22,7 @@ public static class UserExtensions
     public static EnterpriseUser ToUser(this ClaimsPrincipal principal)
     {
         var identity = principal?.Identity;
-        identity?.IsAuthenticated.MustBe(true);
+        (identity?.IsAuthenticated ?? false).MustBe(true);
         var subject = principal!.Claims.Single(c => c.Type == JwtRegisteredClaimNames.Sub);
         return new(subject.Value);
     }

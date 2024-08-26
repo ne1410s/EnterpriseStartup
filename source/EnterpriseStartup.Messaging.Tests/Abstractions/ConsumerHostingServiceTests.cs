@@ -17,14 +17,17 @@ using RabbitMQ.Client;
 public class ConsumerHostingServiceTests
 {
     [Fact]
-    public void Ctor_CannotResolveConsumer_LogsError()
+    public async Task Start_FailedConsumer_LogsErrorAndDoesNotStartService()
     {
-        // Arrange & Act
+        // Arrange
         using var sut = GetBasicSut(out var consumer, out var mockLogger, false);
+
+        // Act
+        await sut.StartAsync(CancellationToken.None);
 
         // Assert
         mockLogger.VerifyLog(LogLevel.Error, s => s == "Failed to start consumer hosting service");
-        consumer.Dispose();
+        consumer.Lifecycle.Count.Should().Be(0);
     }
 
     [Fact]
@@ -42,11 +45,11 @@ public class ConsumerHostingServiceTests
 
         // Assert
         await act.Should().NotThrowAsync();
-        consumer.Dispose();
+        consumer.Lifecycle.Should().Contain("StartInternal");
     }
 
-    private static ConsumerHostingService<BasicConsumer> GetBasicSut(
-        out BasicConsumer consumer,
+    private static ConsumerHostingService<GenericConsumer> GetBasicSut(
+        out GenericConsumer consumer,
         out Mock<ILogger> mockLogger,
         bool resolveConsumerOk = true)
     {
@@ -55,7 +58,7 @@ public class ConsumerHostingServiceTests
         var mockConnectionFactory = new Mock<IConnectionFactory>();
         mockConnection.Setup(m => m.CreateModel()).Returns(mockChannel.Object);
         mockConnectionFactory.Setup(m => m.CreateConnection()).Returns(mockConnection.Object);
-        consumer = new BasicConsumer(mockConnectionFactory.Object);
+        consumer = new GenericConsumer(0);
         var mockScope = new Mock<IServiceScope>();
         var mockScopeFactory = new Mock<IServiceScopeFactory>();
         var mockProvider = new Mock<IServiceProvider>();
@@ -71,7 +74,8 @@ public class ConsumerHostingServiceTests
         mockProvider.Setup(m => m.GetService(typeof(IServiceScopeFactory))).Returns(mockScopeFactory.Object);
         mockScope.Setup(m => m.ServiceProvider).Returns(mockProvider.Object);
         mockScopeFactory.Setup(m => m.CreateScope()).Returns(mockScope.Object);
-        mockLogFactory.Setup(m => m.CreateLogger(It.IsAny<string>())).Returns(mockLogger.Object);
-        return new ConsumerHostingService<BasicConsumer>(mockProvider.Object, mockLogFactory.Object);
+        var loggerCategory = $"ConsumerHostingService<{consumerType.Name}>";
+        mockLogFactory.Setup(m => m.CreateLogger(loggerCategory)).Returns(mockLogger.Object);
+        return new ConsumerHostingService<GenericConsumer>(mockProvider.Object, mockLogFactory.Object);
     }
 }

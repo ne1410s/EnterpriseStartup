@@ -22,9 +22,8 @@ public class NotificationsHub : Hub
     public static readonly ConcurrentDictionary<string, List<string>> ConnectedUsers = [];
 
     /// <inheritdoc/>
-    public override async Task OnConnectedAsync()
+    public override Task OnConnectedAsync()
     {
-        await Task.CompletedTask;
         var connectionId = this.Context.ConnectionId;
         if (this.AuthenticUser(out var userId))
         {
@@ -41,12 +40,13 @@ public class NotificationsHub : Hub
         {
             this.Context.Abort();
         }
+
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc/>
-    public override async Task OnDisconnectedAsync(Exception? exception)
+    public override Task OnDisconnectedAsync(Exception? exception)
     {
-        await Task.CompletedTask;
         if (this.AuthenticUser(out var userId))
         {
             ConnectedUsers[userId].Remove(this.Context.ConnectionId);
@@ -55,13 +55,20 @@ public class NotificationsHub : Hub
                 ConnectedUsers.Remove(userId, out _);
             }
         }
+
+        return Task.CompletedTask;
     }
 
     private bool AuthenticUser(out string userId)
     {
+        userId = null!;
         var principal = this.Context.User;
         var hasAuth = principal?.Identity?.IsAuthenticated == true;
-        userId = hasAuth ? principal!.ToUser().Id : string.Empty;
+        if (hasAuth)
+        {
+            userId = principal!.ToUser().Id;
+        }
+
         return hasAuth;
     }
 }
