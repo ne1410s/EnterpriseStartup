@@ -29,4 +29,9 @@
     <ProjectReference Include="..\EnterpriseStartup.Messaging\EnterpriseStartup.Messaging.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="Moq" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+
 </Project>

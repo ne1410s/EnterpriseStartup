@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace EnterpriseStartup.Extensions;
+namespace EnterpriseStartup.Mq;
 
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
 using EnterpriseStartup.Messaging.Abstractions.Producer;

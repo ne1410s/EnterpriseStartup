@@ -25,7 +25,8 @@ public class NotificationsHub : Hub
     public override async Task OnConnectedAsync()
     {
         await Task.CompletedTask;
-        if (this.AuthenticUser(out var userId, out var connectionId))
+        var connectionId = this.Context.ConnectionId;
+        if (this.AuthenticUser(out var userId))
         {
             if (!ConnectedUsers.TryGetValue(userId, out _))
             {
@@ -46,10 +47,9 @@ public class NotificationsHub : Hub
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         await Task.CompletedTask;
-        if (this.AuthenticUser(out var userId, out var connectionId)
-            && ConnectedUsers.TryGetValue(userId, out _))
+        if (this.AuthenticUser(out var userId))
         {
-            ConnectedUsers[userId].Remove(connectionId);
+            ConnectedUsers[userId].Remove(this.Context.ConnectionId);
             if (ConnectedUsers[userId].Count == 0)
             {
                 ConnectedUsers.Remove(userId, out _);
@@ -57,19 +57,11 @@ public class NotificationsHub : Hub
         }
     }
 
-    private bool AuthenticUser(out string userId, out string connectionId)
+    private bool AuthenticUser(out string userId)
     {
-        userId = null!;
-        connectionId = null!;
-
         var principal = this.Context.User;
-        if (principal?.Identity?.IsAuthenticated != true)
-        {
-            return false;
-        }
-
-        userId = principal.ToUser().Id;
-        connectionId = this.Context.ConnectionId;
-        return true;
+        var hasAuth = principal?.Identity?.IsAuthenticated == true;
+        userId = hasAuth ? principal!.ToUser().Id : string.Empty;
+        return hasAuth;
     }
 }

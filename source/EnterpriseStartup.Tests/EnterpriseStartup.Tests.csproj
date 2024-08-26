@@ -31,4 +31,10 @@
     <ProjectReference Include="..\EnterpriseStartup\EnterpriseStartup.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="FluentAssertions" />
+    <Using Include="Moq" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+
 </Project>

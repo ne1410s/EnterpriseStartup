@@ -7,6 +7,7 @@ namespace EnterpriseStartup.Messaging.Abstractions.Consumer;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentErrors.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -30,7 +31,7 @@ public sealed class ConsumerHostingService<TConsumer> : IHostedService, IDisposa
     {
         var consumerType = this.GetType().GetGenericArguments()[0];
         var loggerCategory = $"{nameof(ConsumerHostingService<TConsumer>)}<{consumerType.Name}>";
-        var logger = loggerFactory?.CreateLogger(loggerCategory)!;
+        var logger = loggerFactory.MustExist().CreateLogger(loggerCategory)!;
         this.originalScope = services.CreateScope();
         var sp = this.originalScope.ServiceProvider;
         try
