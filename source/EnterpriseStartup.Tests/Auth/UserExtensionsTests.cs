@@ -20,7 +20,7 @@ public class UserExtensionsTests
         var principal = new ClaimsPrincipal([]);
 
         // Act
-        var act = principal.ToUser;
+        var act = principal.ToEnterpriseUser;
 
         // Assert
         act.Should().Throw<DataStateException>();
@@ -33,7 +33,7 @@ public class UserExtensionsTests
         var principal = new ClaimsPrincipal([new([], "fake")]);
 
         // Act
-        var act = principal.ToUser;
+        var act = principal.ToEnterpriseUser;
 
         // Assert
         act.Should().Throw<InvalidOperationException>();

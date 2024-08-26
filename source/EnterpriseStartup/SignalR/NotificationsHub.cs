@@ -66,7 +66,7 @@ public class NotificationsHub : Hub
         var hasAuth = principal?.Identity?.IsAuthenticated == true;
         if (hasAuth)
         {
-            userId = principal!.ToUser().Id;
+            userId = principal!.ToEnterpriseUser().Id;
         }
 
         return hasAuth;

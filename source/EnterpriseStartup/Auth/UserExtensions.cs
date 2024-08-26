@@ -4,7 +4,6 @@
 
 namespace EnterpriseStartup.Auth;
 
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using FluentErrors.Extensions;
@@ -19,11 +18,11 @@ public static class UserExtensions
     /// </summary>
     /// <param name="principal">The claims principal.</param>
     /// <returns>An enterprise user.</returns>
-    public static EnterpriseUser ToUser(this ClaimsPrincipal principal)
+    public static EnterpriseUser ToEnterpriseUser(this ClaimsPrincipal principal)
     {
         var identity = principal?.Identity;
         (identity?.IsAuthenticated ?? false).MustBe(true);
-        var subject = principal!.Claims.Single(c => c.Type == JwtRegisteredClaimNames.Sub);
-        return new(subject.Value);
+        var id = principal!.Claims.Single(c => c.Type == ClaimTypes.NameIdentifier);
+        return new(id.Value);
     }
 }

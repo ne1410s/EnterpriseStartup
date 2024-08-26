@@ -96,7 +96,7 @@ public class NotificationsHubTests
     }
 
     private static ClaimsPrincipal GetUser(string id)
-        => new([new([new("sub", id)], "fake")]);
+        => new([new([new(ClaimTypes.NameIdentifier, id)], "fake")]);
 }
 
 public class FakeContext(ClaimsPrincipal? user, string connectionId = "connection") : HubCallerContext
