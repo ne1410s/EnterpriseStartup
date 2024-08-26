@@ -4,6 +4,7 @@
 
 namespace EnterpriseStartup.Extensions;
 
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
@@ -29,14 +30,15 @@ public static class AuthExtensions
         IConfiguration configuration,
         string configSection = "AzureAdB2C")
     {
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApi(
                 opts =>
                 {
-                    configuration.Bind(configSection, opts);
-                    opts.TokenValidationParameters.NameClaimType = "name";
+                    opts.TokenValidationParameters.NameClaimType = ClaimTypes.NameIdentifier;
+                    opts.TokenValidationParameters.RoleClaimType = "http://schemas.microsoft.com/identity/claims/scope";
                 },
-                opts => configuration.Bind(configSection, opts));
+                identityOpts => configuration.Bind(configSection, identityOpts));
 
         return services;
     }
@@ -51,7 +53,7 @@ public static class AuthExtensions
     public static T UseEnterpriseB2C<T>(this T app)
         where T : IApplicationBuilder, IEndpointRouteBuilder
     {
-        app.UseAuthentication();
+        app.UseAuthentication().UseAuthorization();
         app.MapControllers().RequireAuthorization();
 
         return app;
