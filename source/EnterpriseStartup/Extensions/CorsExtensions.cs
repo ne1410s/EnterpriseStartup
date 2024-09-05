@@ -12,6 +12,12 @@ using Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class CorsExtensions
 {
+    private static readonly string[] SignalRHeaders =
+    [
+        "x-requested-with",
+        "x-signalr-user-agent",
+    ];
+
     /// <summary>
     /// Adds the enterprise cors feature.
     /// </summary>
@@ -24,9 +30,10 @@ public static class CorsExtensions
         string[]? origins = null,
         string[]? headers = null)
     {
-        headers = ["Authorization", "Content-Type", .. headers ?? []];
+        headers = ["Authorization", "Content-Type", .. SignalRHeaders, .. headers ?? []];
         return services.AddCors(o => o
             .AddPolicy(nameof(EnterpriseStartup), builder => builder
+                .AllowCredentials()
                 .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE")
                 .WithHeaders(headers)
                 .WithOrigins(origins?.Length > 0 ? origins : ["*"])
