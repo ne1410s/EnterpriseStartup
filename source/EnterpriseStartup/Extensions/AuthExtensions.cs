@@ -5,6 +5,7 @@
 namespace EnterpriseStartup.Extensions;
 
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
@@ -37,6 +38,12 @@ public static class AuthExtensions
                 {
                     opts.TokenValidationParameters.NameClaimType = ClaimTypes.NameIdentifier;
                     opts.TokenValidationParameters.RoleClaimType = "http://schemas.microsoft.com/identity/claims/scope";
+                    opts.Events = new();
+                    opts.Events.OnMessageReceived += (MessageReceivedContext ctx) =>
+                    {
+                        ctx.Token = ctx.Request.Query.TryGetValue("access_token", out var t) ? (string?)t : null;
+                        return Task.CompletedTask;
+                    };
                 },
                 identityOpts => configuration.Bind(configSection, identityOpts));
 
