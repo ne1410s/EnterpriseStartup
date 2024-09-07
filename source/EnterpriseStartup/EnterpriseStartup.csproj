@@ -28,8 +28,8 @@
 
   <ItemGroup>
     <PackageReference Include="Analyse" Version="1.0.*" />
-    <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="8.0.1" />
-    <PackageReference Include="AspNetCore.HealthChecks.SignalR" Version="8.0.1" />
+    <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="8.0.*" />
+    <PackageReference Include="AspNetCore.HealthChecks.SignalR" Version="8.0.*" />
     <PackageReference Include="Fody" Version="6.8.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

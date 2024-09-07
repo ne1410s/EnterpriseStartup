@@ -5,8 +5,10 @@
 namespace EnterpriseStartup.Extensions;
 
 using EnterpriseStartup.SignalR;
+using FluentErrors.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -21,14 +23,19 @@ public static class SignalRExtensions
     /// This makes an <see cref="INotifier"/> available to DI, for sending server-to-client notices.
     /// </summary>
     /// <param name="services">The services.</param>
+    /// <param name="configuration">The configuration. For the health check to function, a config
+    /// entry under "HostedBaseUrl" must be set to the path under which the api is hosted.</param>
     /// <returns>The original parameter, for chainable commands.</returns>
     public static IServiceCollection AddEnterpriseSignalR(
-        this IServiceCollection services)
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
+        configuration.MustExist();
+        var hubUri = $"{configuration["HostedBaseUrl"]?.Trim('/')}/{HubPath.Trim('/')}";
         services.AddSignalR();
         services.AddScoped<INotifier, SignalRNotifier>()
             .AddHealthChecks()
-            .AddSignalRHub(HubPath, tags: [HealthExtensions.NonVital]);
+            .AddSignalRHub(hubUri, tags: [HealthExtensions.NonVital]);
 
         return services;
     }
