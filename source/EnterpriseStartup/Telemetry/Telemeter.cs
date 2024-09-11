@@ -21,7 +21,7 @@ public sealed class Telemeter : ITelemeter, IDisposable
     /// mainly for testing purposes.</param>
     public Telemeter(AssemblyName? assemblyName = null)
     {
-        assemblyName ??= Assembly.GetCallingAssembly().GetName();
+        assemblyName ??= Assembly.GetEntryAssembly()!.GetName();
         var appName = assemblyName.Name!;
         var appVersion = assemblyName.Version?.ToString(3);
 

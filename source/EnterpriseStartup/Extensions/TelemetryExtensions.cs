@@ -4,12 +4,10 @@
 
 namespace EnterpriseStartup.Extensions;
 
-using System;
 using System.Reflection;
+using EnterpriseStartup.Telemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using EnterpriseStartup.Telemetry;
-using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -29,37 +27,28 @@ public static class TelemetryExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var callingAssembly = Assembly.GetCallingAssembly().GetName();
-        var appName = callingAssembly.Name!;
-
-        var appResourceBuilder = ResourceBuilder
-            .CreateDefault()
-            .AddTelemetrySdk()
-            .AddService(appName)
-            .AddEnvironmentVariableDetector();
-
-        void OpenTelemetryOptsBuilder(OtlpExporterOptions opts)
-        {
-            opts.Protocol = OtlpExportProtocol.Grpc;
-            opts.Endpoint = new Uri(configuration["OpenTel:Grpc"]!);
-        }
+        var assemblyName = Assembly.GetEntryAssembly()!.GetName();
+        var appName = assemblyName.Name!;
+        var appVersion = assemblyName.Version?.ToString(3);
 
         services.AddSingleton<ITelemeter, Telemeter>();
-
         services.AddOpenTelemetry()
+            .ConfigureResource(builder => builder
+                .AddTelemetrySdk()
+                .AddService(appName, serviceVersion: appVersion)
+                .AddEnvironmentVariableDetector())
             .WithTracing(builder => builder
-                .SetResourceBuilder(appResourceBuilder)
                 .AddSource(appName)
+                .SetSampler<AlwaysOnSampler>()
                 .AddAspNetCoreInstrumentation(opts => opts.RecordException = true)
                 .AddHttpClientInstrumentation()
                 .AddEntityFrameworkCoreInstrumentation()
-                .AddOtlpExporter(OpenTelemetryOptsBuilder))
+                .AddOtlpExporter(o => o.Endpoint = new(configuration["OpenTel:Grpc"]!)))
             .WithMetrics(builder => builder
-                .SetResourceBuilder(appResourceBuilder)
                 .AddMeter(appName)
                 .AddRuntimeInstrumentation()
                 .AddAspNetCoreInstrumentation()
-                .AddOtlpExporter(OpenTelemetryOptsBuilder));
+                .AddOtlpExporter(o => o.Endpoint = new(configuration["OpenTel:Grpc"]!)));
 
         return services;
     }
