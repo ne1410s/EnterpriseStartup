@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace EnterpriseStartup.Messaging.tests.RabbitMq;
+namespace EnterpriseStartup.Messaging.Tests.RabbitMq;
 
 using FluentAssertions;
 using EnterpriseStartup.Messaging.Abstractions.Producer;

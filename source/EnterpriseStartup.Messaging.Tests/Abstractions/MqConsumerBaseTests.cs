@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace EnterpriseStartup.Messaging.tests.Abstractions;
+namespace EnterpriseStartup.Messaging.Tests.Abstractions;
 
 using FluentAssertions;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;

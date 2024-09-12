@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace EnterpriseStartup.tests.Telemetry;
+namespace EnterpriseStartup.Tests.Telemetry;
 
 using System.Diagnostics;
 using System.Reflection;

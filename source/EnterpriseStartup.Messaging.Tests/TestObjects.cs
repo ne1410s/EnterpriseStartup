@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace EnterpriseStartup.Messaging.tests;
+namespace EnterpriseStartup.Messaging.Tests;
 
 using System.Collections.ObjectModel;
 using System.Text;

@@ -39,10 +39,15 @@ public sealed class TraceThisAttribute : OnMethodBoundaryAspect, IDisposable
     public override void OnEntry(MethodExecutionArgs arg)
     {
         var method = arg?.Method ?? throw new ArgumentNullException(nameof(arg));
-        var activityName = GetActivityName(method);
-        this.Activity = this.Telemeter.StartTrace(activityName);
-        this.IsDisposed = false;
-        Trace.TraceInformation($"Activity on {this.Telemeter.AppTracer.Name}; {activityName}");
+
+        // exclude getters and setters and the like
+        if (!method.IsSpecialName)
+        {
+            var activityName = GetActivityName(method);
+            this.Activity = this.Telemeter.StartTrace(activityName);
+            this.IsDisposed = false;
+            Trace.TraceInformation($"Activity on {this.Telemeter.AppTracer.Name}; {activityName}");
+        }
     }
 
     /// <inheritdoc/>

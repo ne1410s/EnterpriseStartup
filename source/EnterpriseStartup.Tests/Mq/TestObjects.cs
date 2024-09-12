@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace EnterpriseStartup.tests.Mq;
+namespace EnterpriseStartup.Tests.Mq;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace EnterpriseStartup.tests.Errors;
+namespace EnterpriseStartup.Tests.Errors;
 
 using FluentErrors.Errors;
 using Microsoft.AspNetCore.Http;

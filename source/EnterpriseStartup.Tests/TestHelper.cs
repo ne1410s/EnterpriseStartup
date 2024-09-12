@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace EnterpriseStartup.tests;
+namespace EnterpriseStartup.Tests;
 
 using System.Reflection;
 using Microsoft.Extensions.Logging;

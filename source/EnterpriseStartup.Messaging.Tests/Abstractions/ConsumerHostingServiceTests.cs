@@ -2,10 +2,10 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace EnterpriseStartup.Messaging.tests.Abstractions;
+namespace EnterpriseStartup.Messaging.Tests.Abstractions;
 
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
-using EnterpriseStartup.Messaging.tests;
+using EnterpriseStartup.Messaging.Tests;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
