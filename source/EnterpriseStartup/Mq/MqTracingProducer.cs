@@ -5,15 +5,20 @@
 namespace EnterpriseStartup.Mq;
 
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
 using EnterpriseStartup.Messaging.RabbitMq;
 using EnterpriseStartup.Telemetry;
+using Microsoft.Extensions.Logging;
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
 using RabbitMQ.Client;
 
 /// <inheritdoc cref="RabbitMqProducer{T}"/>
 public abstract class MqTracingProducer<T> : RabbitMqProducer<T>
 {
+    private static readonly TextMapPropagator Propagator = Propagators.DefaultTextMapPropagator;
+
     private readonly ITelemeter telemeter;
     private readonly ILogger<MqTracingProducer<T>> logger;
 
@@ -37,11 +42,8 @@ public abstract class MqTracingProducer<T> : RabbitMqProducer<T>
     }
 
     private void OnMessageSending(object? sender, MqEventArgs e)
-        => this.logger.LogInformation("Mq message sending: {Exchange}", this.ExchangeName);
-
-    private void OnMessageSent(object? sender, MqEventArgs e)
     {
-        this.logger.LogInformation("Mq message sent: {Exchange}", this.ExchangeName);
+        this.logger.LogInformation("Mq message sending: {Exchange}", this.ExchangeName);
 
         var tags = new KeyValuePair<string, object?>[]
         {
@@ -49,7 +51,20 @@ public abstract class MqTracingProducer<T> : RabbitMqProducer<T>
             new("json", e.Message),
         };
 
-        this.telemeter.CaptureMetric(MetricType.Counter, 1, "mq-produce", tags: tags);
-        using var activity = this.telemeter.StartTrace("mq-produce", tags: tags);
+        this.telemeter.CaptureMetric(MetricType.Counter, 1, "mq_produce", tags: tags);
+        using var activity = this.telemeter.StartTrace("mq_produce", ActivityKind.Producer, tags);
+
+        // TODO: Grab headers from mq so that the below can stuff them before send..
+        // TODO: Imbibe consumer with extractor too, from this odd little website:
+        // https://tech.playgokids.com/open-telemetry-kafka-propagator-with-dotnet/
+        var headers = new Dictionary<string, object>();
+        if (activity?.Context != null)
+        {
+            var propContext = new PropagationContext(activity.Context, Baggage.Current);
+            Propagator.Inject(propContext, headers, (carrier, key, value) => carrier[key] = value);
+        }
     }
+
+    private void OnMessageSent(object? sender, MqEventArgs e)
+        => this.logger.LogInformation("Mq message sent: {Exchange}", this.ExchangeName);
 }
