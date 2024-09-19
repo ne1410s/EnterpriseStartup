@@ -69,6 +69,6 @@ public class FakeProducer : MqProducerBase<FakeMessage>
 {
     public override string ExchangeName => "Exchange";
 
-    protected override void ProduceInternal(byte[] bytes)
+    protected override void ProduceInternal(byte[] bytes, Dictionary<string, object> headers)
         => throw new NotImplementedException();
 }

@@ -53,15 +53,10 @@ public abstract class MqTracingProducer<T> : RabbitMqProducer<T>
 
         this.telemeter.CaptureMetric(MetricType.Counter, 1, "mq_produce", tags: tags);
         using var activity = this.telemeter.StartTrace("mq_produce", ActivityKind.Producer, tags);
-
-        // TODO: Grab headers from mq so that the below can stuff them before send..
-        // TODO: Imbibe consumer with extractor too, from this odd little website:
-        // https://tech.playgokids.com/open-telemetry-kafka-propagator-with-dotnet/
-        var headers = new Dictionary<string, object>();
         if (activity?.Context != null)
         {
             var propContext = new PropagationContext(activity.Context, Baggage.Current);
-            Propagator.Inject(propContext, headers, (carrier, key, value) => carrier[key] = value);
+            Propagator.Inject(propContext, e.Headers, (carrier, key, value) => carrier[key] = value);
         }
     }
 

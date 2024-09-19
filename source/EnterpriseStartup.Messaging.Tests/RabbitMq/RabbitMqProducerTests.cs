@@ -129,6 +129,10 @@ public class RabbitMqProducerTests
             new Mock<IConnection>(),
             new Mock<IBasicProperties>());
 
+        mocks.MockProperties
+            .Setup(m => m.Headers)
+            .Returns(new Dictionary<string, object>());
+
         mocks.MockChannel
             .Setup(m => m.CreateBasicProperties())
             .Returns(mocks.MockProperties.Object);

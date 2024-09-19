@@ -12,10 +12,16 @@ using EnterpriseStartup.Messaging.Abstractions.Consumer;
 using EnterpriseStartup.Messaging.RabbitMq;
 using EnterpriseStartup.Telemetry;
 using RabbitMQ.Client;
+using OpenTelemetry.Context.Propagation;
+using OpenTelemetry;
+using System.Diagnostics;
+using System.Text;
 
 /// <inheritdoc cref="RabbitMqConsumer{T}"/>
 public abstract class MqTracingConsumer<T> : RabbitMqConsumer<T>
 {
+    private static readonly TextMapPropagator Propagator = Propagators.DefaultTextMapPropagator;
+
     private readonly ITelemeter telemeter;
     private readonly ILogger<MqTracingConsumer<T>> logger;
 
@@ -88,7 +94,15 @@ public abstract class MqTracingConsumer<T> : RabbitMqConsumer<T>
             new("attempt", e.AttemptNumber),
         };
 
-        using var activity = this.telemeter.StartTrace("mq-consume", tags: tags);
+        var parentContext = Propagator.Extract(default, e.Headers, (carrier, key)
+            => [Encoding.UTF8.GetString((byte[])carrier[key])]);
+
+        Baggage.Current = parentContext.Baggage;
+        using var activity = this.telemeter.AppTracer.StartActivity(
+            "mq_consume",
+            ActivityKind.Consumer,
+            parentContext.ActivityContext,
+            tags);
     }
 
     private void OnMessageFailed(object? sender, MqFailedEventArgs e)
@@ -109,7 +123,7 @@ public abstract class MqTracingConsumer<T> : RabbitMqConsumer<T>
             new("outcome", outcome),
         };
 
-        this.telemeter.CaptureMetric(MetricType.Counter, 1, "mq-consume-failure", tags: tags);
+        this.telemeter.CaptureMetric(MetricType.Counter, 1, "mq_consume_failure", tags: tags);
     }
 
     private void OnMessageProcessed(object? sender, MqConsumerEventArgs e)
@@ -126,6 +140,6 @@ public abstract class MqTracingConsumer<T> : RabbitMqConsumer<T>
             new("outcome", "success"),
         };
 
-        this.telemeter.CaptureMetric(MetricType.Counter, 1, "mq-consume-success", tags: tags);
+        this.telemeter.CaptureMetric(MetricType.Counter, 1, "mq_consume_success", tags: tags);
     }
 }

@@ -100,6 +100,7 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
             DeliveryId = args.DeliveryTag,
             MessageGuid = msgGuid,
             Message = Encoding.UTF8.GetString(bytes),
+            Headers = (Dictionary<string, object>)headers,
         };
         await this.ConsumeInternal(args.Body.ToArray(), consumerArgs);
     }

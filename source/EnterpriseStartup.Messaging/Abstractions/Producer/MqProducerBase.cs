@@ -5,6 +5,7 @@
 namespace EnterpriseStartup.Messaging.Abstractions.Producer;
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -41,7 +42,7 @@ public abstract class MqProducerBase<T> : IMqProducer<T>
         var json = JsonSerializer.Serialize(message, this.jsonOpts);
         var args = new MqEventArgs { Message = json };
         this.MessageSending?.Invoke(this, args);
-        this.ProduceInternal(Encoding.UTF8.GetBytes(json));
+        this.ProduceInternal(Encoding.UTF8.GetBytes(json), args.Headers);
         this.MessageSent?.Invoke(this, args);
     }
 
@@ -49,5 +50,6 @@ public abstract class MqProducerBase<T> : IMqProducer<T>
     /// Produces the message internally.
     /// </summary>
     /// <param name="bytes">The message bytes.</param>
-    protected internal abstract void ProduceInternal(byte[] bytes);
+    /// <param name="headers">The initial headers.</param>
+    protected internal abstract void ProduceInternal(byte[] bytes, Dictionary<string, object> headers);
 }

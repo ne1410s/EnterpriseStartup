@@ -39,15 +39,13 @@ public abstract class RabbitMqProducer<T> : MqProducerBase<T>, IDisposable
     }
 
     /// <inheritdoc/>
-    protected internal override void ProduceInternal(byte[] bytes)
+    protected internal override void ProduceInternal(byte[] bytes, Dictionary<string, object> headers)
     {
         var props = this.channel.CreateBasicProperties();
-        props.Headers = new Dictionary<string, object>
-        {
-            ["x-attempt"] = 1L,
-            ["x-born"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-            ["x-guid"] = Guid.NewGuid().ToByteArray(),
-        };
+        props.Headers = headers ?? [];
+        props.Headers["x-attempt"] = 1L;
+        props.Headers["x-born"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        props.Headers["x-guid"] = Guid.NewGuid().ToByteArray();
 
         this.channel.BasicPublish(this.ExchangeName, DefaultRoute, props, bytes);
     }

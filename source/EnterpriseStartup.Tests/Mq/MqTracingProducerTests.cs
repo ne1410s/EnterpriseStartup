@@ -90,6 +90,10 @@ public class MqTracingProducerTests
             new Mock<ILogger<T>>());
 
         var mockProps = new Mock<IBasicProperties>();
+        mockProps
+            .Setup(m => m.Headers)
+            .Returns(new Dictionary<string, object>());
+
         mocks.MockChannel
             .Setup(m => m.CreateBasicProperties())
             .Returns(mockProps.Object);

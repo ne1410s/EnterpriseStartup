@@ -5,6 +5,7 @@
 namespace EnterpriseStartup.Messaging.Abstractions.Consumer;
 
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// Mq message event args.
@@ -15,4 +16,9 @@ public class MqEventArgs : EventArgs
     /// Gets the original message.
     /// </summary>
     public string Message { get; init; } = default!;
+
+    /// <summary>
+    /// Gets the headers.
+    /// </summary>
+    public Dictionary<string, object> Headers { get; init; } = [];
 }
