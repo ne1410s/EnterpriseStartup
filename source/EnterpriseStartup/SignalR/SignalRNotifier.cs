@@ -13,8 +13,10 @@ public class SignalRNotifier(IHubContext<NotificationsHub> hubContext) : INotifi
     /// <inheritdoc/>
     public async Task Notify(string userId, NoticeLevel level, string message)
     {
-        var connectionIds = NotificationsHub.ConnectedUsers[userId];
-        var proxy = hubContext.Clients.Clients(connectionIds);
-        await proxy.SendAsync("ReceiveMessage", level, message);
+        if (NotificationsHub.ConnectedUsers.TryGetValue(userId, out var connectionIds))
+        {
+            var proxy = hubContext.Clients.Clients(connectionIds);
+            await proxy.SendAsync("ReceiveMessage", level, message);
+        }
     }
 }

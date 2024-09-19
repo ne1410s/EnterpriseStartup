@@ -5,17 +5,17 @@
 namespace EnterpriseStartup.Mq;
 
 using System.Collections.Generic;
-using FluentErrors.Extensions;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using System.Diagnostics;
+using System.Text;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
 using EnterpriseStartup.Messaging.RabbitMq;
 using EnterpriseStartup.Telemetry;
-using RabbitMQ.Client;
-using OpenTelemetry.Context.Propagation;
+using FluentErrors.Extensions;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using OpenTelemetry;
-using System.Diagnostics;
-using System.Text;
+using OpenTelemetry.Context.Propagation;
+using RabbitMQ.Client;
 
 /// <inheritdoc cref="RabbitMqConsumer{T}"/>
 public abstract class MqTracingConsumer<T> : RabbitMqConsumer<T>
@@ -94,8 +94,11 @@ public abstract class MqTracingConsumer<T> : RabbitMqConsumer<T>
             new("attempt", e.AttemptNumber),
         };
 
-        var parentContext = Propagator.Extract(default, e.Headers, (carrier, key)
-            => [Encoding.UTF8.GetString((byte[])carrier[key])]);
+        var parentContext = Propagator.Extract(default, e.Headers, (carrier, key) =>
+        {
+            var value = carrier.TryGetValue(key, out var val) ? (byte[])val : null;
+            return value == null ? null : [Encoding.UTF8.GetString(value)];
+        });
 
         Baggage.Current = parentContext.Baggage;
         using var activity = this.telemeter.AppTracer.StartActivity(
