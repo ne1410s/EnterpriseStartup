@@ -12,11 +12,10 @@ using System.Threading.Tasks;
 public interface INotifier
 {
     /// <summary>
-    /// Sends a message to a specific user, via SignalR.
+    /// Notifies a specific user, via SignalR.
     /// </summary>
     /// <param name="userId">The user id.</param>
-    /// <param name="level">The notice level.</param>
-    /// <param name="message">The message.</param>
+    /// <param name="notice">The notice.</param>
     /// <returns>Async task.</returns>
-    public Task Notify(string userId, NoticeLevel level, string message);
+    public Task Notify(string userId, Notice notice);
 }

@@ -16,16 +16,15 @@ public class SignalRNotifierTests
     public async Task Notify_WhenCalled_SendsMessage()
     {
         // Arrange
-        const NoticeLevel level = NoticeLevel.Success;
-        const string message = "hi";
-        object[] expectedArgs = [level, message];
+        var notice = new Notice(NoticeLevel.Success, "title", "text");
         var sut = GetSut(out var mockProxy);
+        object?[] expected = [notice];
 
         // Act
-        await sut.Notify("user1", level, message);
+        await sut.Notify("user1", notice);
 
         // Assert
-        mockProxy.Verify(m => m.SendCoreAsync("ReceiveMessage", expectedArgs, It.IsAny<CancellationToken>()));
+        mockProxy.Verify(m => m.SendCoreAsync("ReceiveMessage", expected, It.IsAny<CancellationToken>()));
     }
 
     private static SignalRNotifier GetSut(out Mock<IClientProxy> mockProxy)

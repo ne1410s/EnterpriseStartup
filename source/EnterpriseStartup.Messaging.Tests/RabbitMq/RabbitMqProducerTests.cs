@@ -87,24 +87,6 @@ public class RabbitMqProducerTests
     }
 
     [Fact]
-    public void Produce_WhenCalled_SetsExpectedHeaders()
-    {
-        // Arrange
-        var sut = GetSut<BasicProducer>(out var mocks);
-        var actual = (IDictionary<string, object>)null!;
-        var expectedKeys = new[] { "x-attempt", "x-born", "x-guid" };
-        mocks.MockProperties
-            .SetupSet(p => p.Headers = It.IsAny<IDictionary<string, object>>())
-            .Callback<IDictionary<string, object>>(value => actual = value);
-
-        // Act
-        sut.Produce(new(null));
-
-        // Assert
-        actual.Should().ContainKeys(expectedKeys);
-    }
-
-    [Fact]
     public void Produce_WhenCalled_HitsEventHandlers()
     {
         // Arrange

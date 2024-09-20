@@ -57,10 +57,12 @@ public interface ITelemeter
     /// </summary>
     /// <param name="name">The name.</param>
     /// <param name="kind">The kind.</param>
+    /// <param name="parentContext">The parent context, if applicable.</param>
     /// <param name="tags">Any tags to include.</param>
     /// <returns>A new activity.</returns>
     public Activity? StartTrace(
         string name,
         ActivityKind kind = ActivityKind.Internal,
+        ActivityContext? parentContext = null,
         params KeyValuePair<string, object?>[] tags);
 }

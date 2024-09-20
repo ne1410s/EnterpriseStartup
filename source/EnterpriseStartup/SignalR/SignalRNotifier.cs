@@ -11,12 +11,12 @@ using Microsoft.AspNetCore.SignalR;
 public class SignalRNotifier(IHubContext<NotificationsHub> hubContext) : INotifier
 {
     /// <inheritdoc/>
-    public async Task Notify(string userId, NoticeLevel level, string message)
+    public async Task Notify(string userId, Notice notice)
     {
         if (NotificationsHub.ConnectedUsers.TryGetValue(userId, out var connectionIds))
         {
             var proxy = hubContext.Clients.Clients(connectionIds);
-            await proxy.SendAsync("ReceiveMessage", level, message);
+            await proxy.SendAsync("ReceiveMessage", notice);
         }
     }
 }

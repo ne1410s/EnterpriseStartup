@@ -101,7 +101,7 @@ public abstract class MqTracingConsumer<T> : RabbitMqConsumer<T>
         });
 
         Baggage.Current = parentContext.Baggage;
-        using var activity = this.telemeter.AppTracer.StartActivity(
+        using var activity = this.telemeter.StartTrace(
             "mq_consume",
             ActivityKind.Consumer,
             parentContext.ActivityContext,

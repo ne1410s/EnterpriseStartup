@@ -153,7 +153,7 @@ public class MqTracingConsumerTests
     public void OnMessageReceived_WhenCalled_TracesActivity()
     {
         // Arrange
-        const string expectedName = "mq-consume";
+        const string expectedName = "mq_consume";
         var sut = GetSut<BasicTracedConsumer>(out var mocks);
         var args = GetArgs();
         var tags = new KeyValuePair<string, object?>[]
@@ -169,7 +169,7 @@ public class MqTracingConsumerTests
 
         // Assert
         mocks.MockTelemeter.Verify(
-            m => m.StartTrace(expectedName, ActivityKind.Internal, tags));
+            m => m.StartTrace(expectedName, ActivityKind.Consumer, It.IsAny<ActivityContext>(), tags));
     }
 
     [Fact]
@@ -190,7 +190,7 @@ public class MqTracingConsumerTests
     {
         // Arrange
         var sut = GetSut<BasicTracedConsumer>(out var mocks);
-        const string expectedName = "mq-consume-success";
+        const string expectedName = "mq_consume_success";
         var tag = new KeyValuePair<string, object?>[]
         {
             new("queue", sut.QueueName),
@@ -229,7 +229,7 @@ public class MqTracingConsumerTests
         // Arrange
         var sut = GetSut<BasicTracedConsumer>(out var mocks);
         var args = GetErrorArgs(retry);
-        const string expectedName = "mq-consume-failure";
+        const string expectedName = "mq_consume_failure";
         var tag = new KeyValuePair<string, object?>[]
         {
             new("queue", sut.QueueName),

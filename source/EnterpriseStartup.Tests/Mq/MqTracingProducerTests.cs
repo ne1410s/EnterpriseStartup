@@ -55,7 +55,7 @@ public class MqTracingProducerTests
         sut.Produce(payload);
 
         // Assert
-        mocks.MockTelemeter.Verify(m => m.StartTrace("mq-produce", ActivityKind.Internal, tags));
+        mocks.MockTelemeter.Verify(m => m.StartTrace("mq_produce", ActivityKind.Producer, null, tags));
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public class MqTracingProducerTests
 
         // Assert
         mocks.MockTelemeter.Verify(
-            m => m.CaptureMetric(MetricType.Counter, 1, "mq-produce", null, null, null, tags));
+            m => m.CaptureMetric(MetricType.Counter, 1, "mq_produce", null, null, null, tags));
     }
 
     private static string ToJson(object obj)
