@@ -42,7 +42,7 @@ public abstract class RabbitMqProducer<T> : MqProducerBase<T>, IDisposable
     protected internal override void ProduceInternal(byte[] bytes, Dictionary<string, object> headers)
     {
         var props = this.channel.CreateBasicProperties();
-        props.Headers = headers ?? [];
+        props.Headers = headers;
         props.Headers["x-attempt"] = 1L;
         props.Headers["x-born"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         props.Headers["x-guid"] = Guid.NewGuid().ToByteArray();

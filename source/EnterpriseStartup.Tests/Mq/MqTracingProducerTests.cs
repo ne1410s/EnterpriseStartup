@@ -55,7 +55,27 @@ public class MqTracingProducerTests
         sut.Produce(payload);
 
         // Assert
-        mocks.MockTelemeter.Verify(m => m.StartTrace("mq_produce", ActivityKind.Producer, null, tags));
+        mocks.MockTelemeter.Verify(m => m.StartTrace("mq_produce", ActivityKind.Producer, default, tags));
+    }
+
+    [Fact]
+    public void ProduceAsync_WithActivity_TracesActivity()
+    {
+        // Arrange
+        const string name = "mq_produce";
+        const ActivityKind kind = ActivityKind.Producer;
+        var sut = GetSut<BasicTracedProducer>(out var mocks);
+        var payload = new BasicPayload("bar", false);
+        using var mockActivity = new Activity("whoop");
+        mocks.MockTelemeter
+            .Setup(m => m.StartTrace(name, kind, default, It.IsAny<KeyValuePair<string, object?>[]>()))
+            .Returns(mockActivity);
+
+        // Act
+        sut.Produce(payload);
+
+        // Assert
+        mocks.MockTelemeter.Verify(m => m.StartTrace(name, kind, default, It.IsAny<KeyValuePair<string, object?>[]>()));
     }
 
     [Fact]

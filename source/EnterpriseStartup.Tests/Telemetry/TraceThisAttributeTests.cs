@@ -84,7 +84,7 @@ public class TraceThisAttributeTests
         sut.OnEntry(GetArgs());
 
         // Assert
-        mockTelemeter.Verify(m => m.StartTrace(expectedName, expectedKind, null));
+        mockTelemeter.Verify(m => m.StartTrace(expectedName, expectedKind, default));
     }
 
     [Fact]
@@ -203,7 +203,7 @@ public class TraceThisAttributeTests
             .Setup(m => m.StartTrace(
                 It.IsAny<string>(),
                 It.IsAny<ActivityKind>(),
-                It.IsAny<ActivityContext?>(),
+                It.IsAny<ActivityContext>(),
                 It.IsAny<KeyValuePair<string, object?>[]>()))
             .Returns(activity);
 

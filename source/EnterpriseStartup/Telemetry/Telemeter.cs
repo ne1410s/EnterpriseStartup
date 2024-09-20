@@ -83,13 +83,11 @@ public sealed class Telemeter : ITelemeter, IDisposable
     public Activity? StartTrace(
         string name,
         ActivityKind kind = ActivityKind.Internal,
-        ActivityContext? parentContext = null,
+        ActivityContext parentContext = default,
         params KeyValuePair<string, object?>[] tags)
     {
         var allTags = this.AppTags.Concat(tags);
-        return parentContext == null
-            ? this.AppTracer.StartActivity(name, kind, null, allTags)
-            : this.AppTracer.StartActivity(name, kind, parentContext: parentContext.Value, allTags);
+        return this.AppTracer.StartActivity(name, kind, parentContext, allTags);
     }
 
     /// <inheritdoc/>

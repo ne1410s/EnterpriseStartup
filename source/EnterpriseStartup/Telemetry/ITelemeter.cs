@@ -63,6 +63,6 @@ public interface ITelemeter
     public Activity? StartTrace(
         string name,
         ActivityKind kind = ActivityKind.Internal,
-        ActivityContext? parentContext = null,
+        ActivityContext parentContext = default,
         params KeyValuePair<string, object?>[] tags);
 }

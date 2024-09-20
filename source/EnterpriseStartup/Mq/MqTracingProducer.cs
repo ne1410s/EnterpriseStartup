@@ -52,7 +52,7 @@ public abstract class MqTracingProducer<T> : RabbitMqProducer<T>
         };
 
         this.telemeter.CaptureMetric(MetricType.Counter, 1, "mq_produce", tags: tags);
-        using var activity = this.telemeter.StartTrace("mq_produce", ActivityKind.Producer, null, tags);
+        using var activity = this.telemeter.StartTrace("mq_produce", ActivityKind.Producer, tags: tags);
         if (activity?.Context != null)
         {
             var propContext = new PropagationContext(activity.Context, Baggage.Current);

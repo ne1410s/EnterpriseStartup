@@ -6,6 +6,7 @@ namespace EnterpriseStartup.Mq;
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
 using EnterpriseStartup.Messaging.RabbitMq;
@@ -94,12 +95,7 @@ public abstract class MqTracingConsumer<T> : RabbitMqConsumer<T>
             new("attempt", e.AttemptNumber),
         };
 
-        var parentContext = Propagator.Extract(default, e.Headers, (carrier, key) =>
-        {
-            var value = carrier.TryGetValue(key, out var val) ? (byte[])val : null;
-            return value == null ? null : [Encoding.UTF8.GetString(value)];
-        });
-
+        var parentContext = GetPropagationContext(e);
         Baggage.Current = parentContext.Baggage;
         using var activity = this.telemeter.StartTrace(
             "mq_consume",
@@ -144,5 +140,15 @@ public abstract class MqTracingConsumer<T> : RabbitMqConsumer<T>
         };
 
         this.telemeter.CaptureMetric(MetricType.Counter, 1, "mq_consume_success", tags: tags);
+    }
+
+    [ExcludeFromCodeCoverage]
+    private static PropagationContext GetPropagationContext(MqEventArgs e)
+    {
+        return Propagator.Extract(default, e.Headers, (carrier, key) =>
+        {
+            var value = carrier.TryGetValue(key, out var val) ? (byte[])val : null;
+            return value == null ? null : [Encoding.UTF8.GetString(value)];
+        });
     }
 }

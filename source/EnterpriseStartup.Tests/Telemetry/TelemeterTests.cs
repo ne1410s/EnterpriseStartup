@@ -72,6 +72,21 @@ public class TelemeterTests
     }
 
     [Fact]
+    public void StartTrace_WithParentContext_IncludesTags()
+    {
+        // Arrange
+        using var sut = new Telemeter();
+        using var listener = GetListener();
+        var tag = new KeyValuePair<string, object?>("foo", "bar");
+
+        // Act
+        using var activity = sut.StartTrace("foo", parentContext: default, tags: tag);
+
+        // Assert
+        activity!.Tags.Should().ContainEquivalentOf(tag);
+    }
+
+    [Fact]
     public void CaptureMetric_UnrecognisedType_ThrowsException()
     {
         // Arrange
