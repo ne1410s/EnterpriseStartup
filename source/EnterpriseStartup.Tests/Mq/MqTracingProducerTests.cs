@@ -7,10 +7,10 @@ namespace EnterpriseStartup.Tests.Mq;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.Extensions.Logging;
 using EnterpriseStartup.Messaging.Abstractions.Producer;
 using EnterpriseStartup.Mq;
 using EnterpriseStartup.Telemetry;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 /// <summary>

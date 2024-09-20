@@ -71,7 +71,7 @@ public class RabbitMqProducerTests
     public void Produce_WhenCalled_CallsBasicPublish()
     {
         // Arrange
-        var sut = GetSut<BasicProducer>(out var mocks);
+        var sut = GetSut<BasicProducer>(out var mocks); 
 
         // Act
         sut.Produce(new(null));
@@ -82,7 +82,9 @@ public class RabbitMqProducerTests
                 sut.ExchangeName,
                 It.IsAny<string>(),
                 It.IsAny<bool>(),
-                It.IsAny<IBasicProperties>(),
+                It.Is<IBasicProperties>(m => m.Headers.ContainsKey("x-attempt")
+                    && m.Headers.ContainsKey("x-born")
+                    && m.Headers.ContainsKey("x-guid")),
                 It.IsAny<ReadOnlyMemory<byte>>()));
     }
 

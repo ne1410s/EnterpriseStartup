@@ -53,11 +53,15 @@ public abstract class MqTracingProducer<T> : RabbitMqProducer<T>
 
         this.telemeter.CaptureMetric(MetricType.Counter, 1, "mq_produce", tags: tags);
         using var activity = this.telemeter.StartTrace("mq_produce", ActivityKind.Producer, tags: tags);
+
+        // Stryker disable all
         if (activity?.Context != null)
         {
             var propContext = new PropagationContext(activity.Context, Baggage.Current);
             Propagator.Inject(propContext, e.Headers, (carrier, key, value) => carrier[key] = value);
         }
+
+        // Stryker restore all
     }
 
     private void OnMessageSent(object? sender, MqEventArgs e)

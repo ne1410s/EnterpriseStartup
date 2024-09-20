@@ -59,6 +59,16 @@ public abstract class MqTracingConsumer<T> : RabbitMqConsumer<T>
         this.MessageFailed += this.OnMessageFailed;
     }
 
+    [ExcludeFromCodeCoverage]
+    private static PropagationContext GetPropagationContext(MqEventArgs e)
+    {
+        return Propagator.Extract(default, e.Headers, (carrier, key) =>
+        {
+            var value = carrier.TryGetValue(key, out var val) ? (byte[])val : null;
+            return value == null ? null : [Encoding.UTF8.GetString(value)];
+        });
+    }
+
     private TProp? GetConfigValue<TProp>(IConfiguration config, string property)
         where TProp : struct
     {
@@ -140,15 +150,5 @@ public abstract class MqTracingConsumer<T> : RabbitMqConsumer<T>
         };
 
         this.telemeter.CaptureMetric(MetricType.Counter, 1, "mq_consume_success", tags: tags);
-    }
-
-    [ExcludeFromCodeCoverage]
-    private static PropagationContext GetPropagationContext(MqEventArgs e)
-    {
-        return Propagator.Extract(default, e.Headers, (carrier, key) =>
-        {
-            var value = carrier.TryGetValue(key, out var val) ? (byte[])val : null;
-            return value == null ? null : [Encoding.UTF8.GetString(value)];
-        });
     }
 }
