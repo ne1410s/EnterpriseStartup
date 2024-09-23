@@ -31,6 +31,9 @@ public abstract class MqProducerBase<T> : IMqProducer<T>
     /// </summary>
     public event EventHandler<MqEventArgs>? MessageSent;
 
+    /// <inheritdoc/>
+    public abstract bool IsConnected { get; }
+
     /// <summary>
     /// Gets the exchange name.
     /// </summary>

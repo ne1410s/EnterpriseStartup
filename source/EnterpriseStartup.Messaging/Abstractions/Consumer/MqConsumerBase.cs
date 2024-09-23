@@ -38,6 +38,9 @@ public abstract class MqConsumerBase : IMqConsumer
     public event EventHandler? Stopped;
 
     /// <inheritdoc/>
+    public abstract bool IsConnected { get; }
+
+    /// <inheritdoc/>
     public abstract string ExchangeName { get; }
 
     /// <inheritdoc/>

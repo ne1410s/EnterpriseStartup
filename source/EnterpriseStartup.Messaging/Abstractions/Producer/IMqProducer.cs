@@ -10,6 +10,11 @@ namespace EnterpriseStartup.Messaging.Abstractions.Producer;
 public interface IMqProducer
 {
     /// <summary>
+    /// Gets a value indicating whether the consumer is connected.
+    /// </summary>
+    public bool IsConnected { get; }
+
+    /// <summary>
     /// Gets the exchange name.
     /// </summary>
     public string ExchangeName { get; }
