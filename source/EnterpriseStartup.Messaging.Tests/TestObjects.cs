@@ -28,9 +28,14 @@ public class BasicProducer(IConnectionFactory factory)
     public override string ExchangeName => TestHelper.TestExchangeName;
 }
 
-public class BasicConsumer(IConnectionFactory factory)
-    : RabbitMqConsumer<BasicPayload>(factory)
+public class BasicConsumer : RabbitMqConsumer<BasicPayload>
 {
+    public BasicConsumer(IConnectionFactory factory)
+        : base(factory)
+    {
+        this.StartInternal(CancellationToken.None);
+    }
+
     public Collection<string> Lifecycle { get; } = [];
 
     public override string ExchangeName => TestHelper.TestExchangeName;
