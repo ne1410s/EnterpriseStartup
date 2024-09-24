@@ -44,6 +44,34 @@ public class ConsumerHostingServiceTests
         consumer.Lifecycle.Should().Contain("StartInternal");
     }
 
+    [Fact]
+    public async Task ExecuteAsync_NoConnection_ThrowsException()
+    {
+        // Arrange
+        using var sut = GetBasicSut(out var mockConsumer, out var mockLogger, true);
+        mockConsumer.Starting += (_, _) => throw new ArithmeticException("mathzz");
+        using var cts = new CancellationTokenSource(200);
+
+        // Act
+        var act = () => sut.StartAsync(cts.Token);
+
+        // Assert
+        await act.Should().NotThrowAsync();
+        mockLogger.VerifyLog(LogLevel.Warning, s => s.StartsWith("Failed to start"));
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_InstantCancel_DoesNotThrow()
+    {
+        // Arrange
+        using var sut = GetBasicSut(out var mockConsumer, out var mockLogger, true);
+        using var cts = new CancellationTokenSource(1);
+        await Task.Delay(50);
+
+        // Act
+        await sut.StartAsync(cts.Token);
+    }
+
     private static ConsumerHostingService<GenericConsumer> GetBasicSut(
         out GenericConsumer consumer,
         out Mock<ILogger> mockLogger,

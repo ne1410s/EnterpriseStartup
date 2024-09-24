@@ -49,6 +49,7 @@ public class RabbitMqProducerTests
         var sut = GetSut<BasicProducer>(out var mocks);
 
         // Assert
+        sut.IsConnected.Should().BeFalse();
         mocks.MockChannel.Verify(
             m => m.ExchangeDeclare(sut.ExchangeName, ExchangeType.Direct, true, false, null));
     }
