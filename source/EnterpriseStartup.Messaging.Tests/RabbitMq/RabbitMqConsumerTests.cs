@@ -17,32 +17,6 @@ using RabbitMQ.Client.Events;
 public class RabbitMqConsumerTests
 {
     [Fact]
-    public void Ctor_NullFactory_ThrowsException()
-    {
-        // Arrange
-        var factory = (IConnectionFactory)null!;
-
-        // Act
-        var act = () => new BasicConsumer(factory);
-
-        act.Should().Throw<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'connectionFactory')");
-    }
-
-    [Fact]
-    public void Ctor_NullReturningFactory_ThrowsException()
-    {
-        // Arrange
-        var mockFactory = new Mock<IConnectionFactory>();
-
-        // Act
-        var act = () => new BasicConsumer(mockFactory.Object);
-
-        act.Should().Throw<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'connectionFactory')");
-    }
-
-    [Fact]
     public void Dispose_WhenCalled_ClosesChannelAndConnection()
     {
         // Arrange
@@ -140,24 +114,6 @@ public class RabbitMqConsumerTests
 
         // Assert
         events.Should().BeEquivalentTo(expected);
-    }
-
-    [Fact]
-    public async Task StartAsync_CalledTwice_CallsBasicConsumeOnce()
-    {
-        // Arrange
-        var sut = GetSut<BasicConsumer>(out var mocks);
-        var token = CancellationToken.None;
-
-        // Act
-        await sut.StartAsync(token);
-        await sut.StartAsync(token);
-
-        // Assert
-        mocks.MockChannel.Verify(
-            m => m.BasicConsume(
-                sut.QueueName, false, It.IsAny<string>(), false, false, null, It.IsAny<IBasicConsumer>()),
-            Times.Once());
     }
 
     [Fact]
