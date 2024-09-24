@@ -17,17 +17,13 @@ using RabbitMQ.Client;
 public class ConsumerHostingServiceTests
 {
     [Fact]
-    public async Task Start_FailedConsumer_LogsErrorAndDoesNotStartService()
+    public void Ctor_FailedConsumer_ThrowsException()
     {
-        // Arrange
-        using var sut = GetBasicSut(out var consumer, out var mockLogger, false);
-
-        // Act
-        await sut.StartAsync(CancellationToken.None);
+        // Arrange & Act
+        var act = () => GetBasicSut(out _, out _, false);
 
         // Assert
-        mockLogger.VerifyLog(LogLevel.Error, s => s == "Failed to start consumer hosting service");
-        consumer.Lifecycle.Count.Should().Be(0);
+        act.Should().Throw<Exception>();
     }
 
     [Fact]

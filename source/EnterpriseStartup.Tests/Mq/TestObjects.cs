@@ -22,13 +22,18 @@ public class BasicTracedProducer(
     public override string ExchangeName => TestHelper.TestExchangeName;
 }
 
-public class BasicTracedConsumer(
-    IConnectionFactory connectionFactory,
-    ITelemeter telemeter,
-    ILogger<BasicTracedConsumer> logger,
-    IConfiguration config)
-        : MqTracingConsumer<BasicPayload>(connectionFactory, telemeter, logger, config)
+public class BasicTracedConsumer : MqTracingConsumer<BasicPayload>
 {
+    public BasicTracedConsumer(
+        IConnectionFactory connectionFactory,
+        ITelemeter telemeter,
+        ILogger<BasicTracedConsumer> logger,
+        IConfiguration config)
+            : base(connectionFactory, telemeter, logger, config)
+    {
+        this.StartInternal(CancellationToken.None);
+    }
+
     public override string ExchangeName => TestHelper.TestExchangeName;
 
     public override Task ConsumeAsync(BasicPayload message, MqConsumerEventArgs args)

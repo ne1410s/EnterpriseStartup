@@ -71,7 +71,7 @@ public class RabbitMqProducerTests
     public void Produce_WhenCalled_CallsBasicPublish()
     {
         // Arrange
-        var sut = GetSut<BasicProducer>(out var mocks); 
+        var sut = GetSut<BasicProducer>(out var mocks);
 
         // Act
         sut.Produce(new(null));

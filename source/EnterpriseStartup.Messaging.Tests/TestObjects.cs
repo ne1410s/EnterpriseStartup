@@ -61,6 +61,8 @@ public class GenericConsumer : MqConsumerBase<BasicPayload>
 
     public override string ExchangeName => TestHelper.TestExchangeName;
 
+    public override bool IsConnected => this.Lifecycle.Contains("StartInternal");
+
     public override Task ConsumeAsync(BasicPayload message, MqConsumerEventArgs args)
     {
         return message.PermaFail switch

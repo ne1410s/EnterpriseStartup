@@ -38,11 +38,10 @@ public sealed class ConsumerHostingService<TConsumer> : BackgroundService
     }
 
     /// <inheritdoc/>
-    [SuppressMessage("S1", "S2190:Loops and recursions.", Justification = "Per design")]
     [SuppressMessage("S2", "S6667:Logging in catch clause.", Justification = "Per design")]
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (true)
+        while (!stoppingToken.IsCancellationRequested)
         {
             if (!this.consumer.IsConnected)
             {
