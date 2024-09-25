@@ -80,10 +80,7 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
             this.consumerTag = null;
         }
 
-        this.channel?.Close();
-        this.connection?.Close();
-        this.connection?.Dispose();
-
+        this.Dispose();
         return Task.CompletedTask;
     }
 

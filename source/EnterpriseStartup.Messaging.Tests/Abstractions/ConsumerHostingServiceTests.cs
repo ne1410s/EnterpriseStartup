@@ -57,7 +57,7 @@ public class ConsumerHostingServiceTests
 
         // Assert
         await act.Should().NotThrowAsync();
-        mockLogger.VerifyLog(LogLevel.Warning, s => s.StartsWith("Failed to start"));
+        mockLogger.VerifyLog(LogLevel.Warning, s => s!.StartsWith("Failed to start"));
     }
 
     [Fact]
@@ -69,7 +69,10 @@ public class ConsumerHostingServiceTests
         await Task.Delay(50);
 
         // Act
-        await sut.StartAsync(cts.Token);
+        var act = () => sut.StartAsync(cts.Token);
+
+        // Assert
+        await act.Should().NotThrowAsync();
     }
 
     private static ConsumerHostingService<GenericConsumer> GetBasicSut(
