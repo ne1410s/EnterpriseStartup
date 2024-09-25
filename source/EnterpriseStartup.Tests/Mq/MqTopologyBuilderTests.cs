@@ -55,6 +55,8 @@ public class FakeConsumer : MqConsumerBase<FakeMessage>
 {
     public override string ExchangeName => "Exchange";
 
+    public override bool IsConnected => true;
+
     public override Task ConsumeAsync(FakeMessage message, MqConsumerEventArgs args)
         => throw new NotImplementedException();
 
@@ -68,6 +70,8 @@ public class FakeConsumer : MqConsumerBase<FakeMessage>
 public class FakeProducer : MqProducerBase<FakeMessage>
 {
     public override string ExchangeName => "Exchange";
+
+    public override bool IsConnected => true;
 
     protected override void ProduceInternal(byte[] bytes, Dictionary<string, object> headers)
         => throw new NotImplementedException();

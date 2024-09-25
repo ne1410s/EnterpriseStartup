@@ -5,6 +5,7 @@
 namespace EnterpriseStartup.Messaging.Abstractions.Consumer;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentErrors.Extensions;
@@ -16,52 +17,47 @@ using Microsoft.Extensions.Logging;
 /// Hosted singleton that allows for scoped consumers.
 /// </summary>
 /// <typeparam name="TConsumer">The consumer type.</typeparam>
-public sealed class ConsumerHostingService<TConsumer> : IHostedService, IDisposable
+public sealed class ConsumerHostingService<TConsumer> : BackgroundService
     where TConsumer : MqConsumerBase
 {
-    private readonly IServiceScope originalScope;
+    private readonly ILogger logger;
     private readonly TConsumer consumer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ConsumerHostingService{TConsumer}"/> class.
     /// </summary>
-    /// <param name="services">The services.</param>
+    /// <param name="provider">The service provider.</param>
     /// <param name="loggerFactory">The logger factory.</param>
-    public ConsumerHostingService(IServiceProvider services, ILoggerFactory loggerFactory)
+    public ConsumerHostingService(IServiceProvider provider, ILoggerFactory loggerFactory)
     {
         var consumerType = this.GetType().GetGenericArguments()[0];
         var loggerCategory = $"{nameof(ConsumerHostingService<TConsumer>)}<{consumerType.Name}>";
-        var logger = loggerFactory.MustExist().CreateLogger(loggerCategory)!;
-        this.originalScope = services.CreateScope();
-        var sp = this.originalScope.ServiceProvider;
-        try
-        {
-            this.consumer = sp.GetRequiredService<TConsumer>();
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to start consumer hosting service");
-            this.consumer = null!;
-        }
+        this.logger = loggerFactory.MustExist().CreateLogger(loggerCategory)!;
+        using var scope = provider.CreateScope();
+        this.consumer = scope.ServiceProvider.GetRequiredService<TConsumer>();
     }
 
     /// <inheritdoc/>
-    public void Dispose()
+    [SuppressMessage("S2", "S6667:Logging in catch clause.", Justification = "Per design")]
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        GC.SuppressFinalize(this);
-        this.originalScope.Dispose();
-    }
-
-    /// <inheritdoc/>
-    public async Task StartAsync(CancellationToken cancellationToken)
-    {
-        if (this.consumer != null)
+        while (!stoppingToken.IsCancellationRequested)
         {
-            await this.consumer.StartAsync(cancellationToken);
+            if (!this.consumer.IsConnected)
+            {
+                this.logger.LogInformation("Starting up...");
+                try
+                {
+                    await this.consumer.StartAsync(stoppingToken);
+                    this.logger.LogInformation("Started ok!");
+                }
+                catch (Exception ex)
+                {
+                    this.logger.LogWarning("Failed to start: [{ExceptionName}]", ex.GetType().Name);
+                }
+            }
+
+            await Task.Delay(10000, stoppingToken);
         }
     }
-
-    /// <inheritdoc/>
-    public async Task StopAsync(CancellationToken cancellationToken)
-        => await this.consumer.StopAsync(cancellationToken);
 }

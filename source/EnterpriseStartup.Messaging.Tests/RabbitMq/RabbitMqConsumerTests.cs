@@ -17,32 +17,6 @@ using RabbitMQ.Client.Events;
 public class RabbitMqConsumerTests
 {
     [Fact]
-    public void Ctor_NullFactory_ThrowsException()
-    {
-        // Arrange
-        var factory = (IConnectionFactory)null!;
-
-        // Act
-        var act = () => new BasicConsumer(factory);
-
-        act.Should().Throw<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'connectionFactory')");
-    }
-
-    [Fact]
-    public void Ctor_NullReturningFactory_ThrowsException()
-    {
-        // Arrange
-        var mockFactory = new Mock<IConnectionFactory>();
-
-        // Act
-        var act = () => new BasicConsumer(mockFactory.Object);
-
-        act.Should().Throw<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'connectionFactory')");
-    }
-
-    [Fact]
     public void Dispose_WhenCalled_ClosesChannelAndConnection()
     {
         // Arrange
@@ -143,24 +117,6 @@ public class RabbitMqConsumerTests
     }
 
     [Fact]
-    public async Task StartAsync_CalledTwice_CallsBasicConsumeOnce()
-    {
-        // Arrange
-        var sut = GetSut<BasicConsumer>(out var mocks);
-        var token = CancellationToken.None;
-
-        // Act
-        await sut.StartAsync(token);
-        await sut.StartAsync(token);
-
-        // Assert
-        mocks.MockChannel.Verify(
-            m => m.BasicConsume(
-                sut.QueueName, false, It.IsAny<string>(), false, false, null, It.IsAny<IBasicConsumer>()),
-            Times.Once());
-    }
-
-    [Fact]
     public async Task StartAsync_WhenCalled_DeclaresMainQueue()
     {
         // Arrange
@@ -213,6 +169,29 @@ public class RabbitMqConsumerTests
         // Assert
         mocks.MockChannel.Verify(m => m.QueueDeclare(expectedQueue, true, false, false, null));
         mocks.MockChannel.Verify(m => m.QueueBind(expectedQueue, sut.ExchangeName, "T2_DLQ", null));
+    }
+
+    [Theory]
+    [InlineData(true, true, 3)]
+    [InlineData(true, false, 1)]
+    [InlineData(false, true, 3)]
+    [InlineData(false, false, 1)]
+    public async Task ReStartAsync_VaryingConnection_ReupsModelAsExpected(bool noTag, bool closed, int ups)
+    {
+        // Arrange
+        var sut = GetSut<BasicConsumer>(out var mocks);
+        mocks.MockConnection.Setup(m => m.IsOpen).Returns(!closed);
+        mocks.MockChannel
+            .Setup(m => m.BasicConsume(
+                It.IsAny<string>(), false, string.Empty, false, false, null, It.IsAny<IBasicConsumer>()))
+            .Returns(noTag ? null! : "tag");
+
+        // Act
+        await sut.StartAsync(CancellationToken.None);
+        await sut.StartAsync(CancellationToken.None);
+
+        // Assert
+        mocks.MockConnection.Verify(m => m.CreateModel(), Times.Exactly(ups));
     }
 
     [Fact]
@@ -331,6 +310,34 @@ public class RabbitMqConsumerTests
 
         // Assert
         count.Should().Be(1);
+    }
+
+    [Fact]
+    public void IsConnected_NullConnection_ReturnsFalse()
+    {
+        // Arrange
+        var sut = GetSut<BasicConsumer>(out _);
+        sut.Dispose();
+
+        // Act
+        var result = sut.IsConnected;
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsConnected_GoodConnection_ReturnsTrue()
+    {
+        // Arrange
+        var sut = GetSut<BasicConsumer>(out var mocks);
+        mocks.MockConnection.Setup(m => m.IsOpen).Returns(true);
+
+        // Act
+        var result = sut.IsConnected;
+
+        // Assert
+        result.Should().BeTrue();
     }
 
     private static BasicDeliverEventArgs GetArgs(

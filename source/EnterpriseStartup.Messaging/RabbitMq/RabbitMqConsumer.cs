@@ -20,9 +20,11 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
     private const string Tier1Route = "T1_RETRY";
     private const string Tier2Route = "T2_DLQ";
 
-    private readonly IConnection connection;
-    private readonly IModel channel;
-    private readonly AsyncEventingBasicConsumer consumer;
+    private readonly IConnectionFactory connectionFactory;
+
+    private IConnection? connection;
+    private IModel? channel;
+    private AsyncEventingBasicConsumer? consumer;
     private string? consumerTag;
 
     /// <summary>
@@ -31,34 +33,39 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
     /// <param name="connectionFactory">The connection factory.</param>
     protected RabbitMqConsumer(IConnectionFactory connectionFactory)
     {
+        this.connectionFactory = connectionFactory;
         this.MessageFailed += this.OnMessageFailed;
         this.MessageProcessed += this.OnMessageProcessed;
-
-        this.connection = connectionFactory?.CreateConnection()
-            ?? throw new ArgumentNullException(nameof(connectionFactory));
-        this.channel = this.connection.CreateModel();
-        this.consumer = new(this.channel);
     }
+
+    /// <inheritdoc/>
+    public override bool IsConnected => this.connection?.IsOpen == true;
 
     /// <inheritdoc/>
     public void Dispose()
     {
         GC.SuppressFinalize(this);
-        this.channel.Close();
-        this.connection.Close();
-        this.connection.Dispose();
+        this.channel?.Close();
+        this.connection?.Close();
+        this.connection?.Dispose();
+        this.connection = null;
+        this.channel = null;
+        this.consumer = null;
     }
 
     /// <inheritdoc/>
     protected internal override Task StartInternal(CancellationToken token)
     {
-        if (this.consumerTag == null)
+        if (this.consumerTag == null || !this.IsConnected)
         {
-            this.DeclareTopology();
+            this.connection = this.connectionFactory.CreateConnection();
+            this.channel = this.connection.CreateModel();
+            this.consumer = new(this.channel);
 
             // Stryker disable once Assignment
             this.consumer.Received += this.OnConsumerReceipt;
             this.consumerTag = this.channel.BasicConsume(this.QueueName, false, this.consumer);
+            this.DeclareTopology();
         }
 
         return Task.CompletedTask;
@@ -67,14 +74,13 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
     /// <inheritdoc/>
     protected internal override Task StopInternal(CancellationToken token)
     {
-        // Stryker disable once Assignment
-        this.consumer.Received -= this.OnConsumerReceipt;
         if (this.consumerTag != null)
         {
-            this.channel.BasicCancel(this.consumerTag);
+            this.channel!.BasicCancel(this.consumerTag);
             this.consumerTag = null;
         }
 
+        this.Dispose();
         return Task.CompletedTask;
     }
 
@@ -108,7 +114,7 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
     private void OnMessageProcessed(object? sender, MqConsumerEventArgs args)
     {
         var deliveryTag = (ulong)args.DeliveryId;
-        this.channel.BasicAck(deliveryTag, false);
+        this.channel!.BasicAck(deliveryTag, false);
     }
 
     private void OnMessageFailed(object? sender, MqFailedEventArgs args)
@@ -117,7 +123,7 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
         if (args.Retry == false)
         {
             // NACK to DLQ
-            this.channel.BasicNack(deliveryTag, false, false);
+            this.channel!.BasicNack(deliveryTag, false, false);
         }
         else
         {
@@ -125,7 +131,7 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
             var bytes = Encoding.UTF8.GetBytes(args.Message);
             const int maxDelayMilliseconds = 60000;
             var delayMilliseconds = Random.Shared.Next(maxDelayMilliseconds);
-            var props = this.channel.CreateBasicProperties();
+            var props = this.channel!.CreateBasicProperties();
             props.Expiration = $"{delayMilliseconds}";
             props.Headers = new Dictionary<string, object>
             {
@@ -148,7 +154,7 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
             ["x-dead-letter-routing-key"] = Tier2Route, // NACK to DLQ
         };
         this.channel.ExchangeDeclare(this.ExchangeName, ExchangeType.Direct, true);
-        this.channel.QueueDeclare(this.QueueName, true, false, false, mainQArgs);
+        this.channel!.QueueDeclare(this.QueueName, true, false, false, mainQArgs);
         this.channel.QueueBind(this.QueueName, this.ExchangeName, DefaultRoute);
 
         // Tier 1 Failure: Retry

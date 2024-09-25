@@ -30,6 +30,9 @@ public abstract class RabbitMqProducer<T> : MqProducerBase<T>, IDisposable
     }
 
     /// <inheritdoc/>
+    public override bool IsConnected => this.connection.IsOpen;
+
+    /// <inheritdoc/>
     public void Dispose()
     {
         GC.SuppressFinalize(this);

@@ -17,24 +17,20 @@ using RabbitMQ.Client;
 public class ConsumerHostingServiceTests
 {
     [Fact]
-    public async Task Start_FailedConsumer_LogsErrorAndDoesNotStartService()
+    public void Ctor_FailedConsumer_ThrowsException()
     {
-        // Arrange
-        using var sut = GetBasicSut(out var consumer, out var mockLogger, false);
-
-        // Act
-        await sut.StartAsync(CancellationToken.None);
+        // Arrange & Act
+        var act = () => GetBasicSut(out _, out _, false);
 
         // Assert
-        mockLogger.VerifyLog(LogLevel.Error, s => s == "Failed to start consumer hosting service");
-        consumer.Lifecycle.Count.Should().Be(0);
+        act.Should().Throw<Exception>();
     }
 
     [Fact]
-    public async Task StartAsync_FromCtor_DoesNotThrow()
+    public async Task StartAsync_FromCtor_LogsExpected()
     {
         // Arrange
-        using var sut = GetBasicSut(out var consumer, out _);
+        using var sut = GetBasicSut(out var consumer, out var mockLogger);
 
         // Act
         var act = async () =>
@@ -46,6 +42,39 @@ public class ConsumerHostingServiceTests
         // Assert
         await act.Should().NotThrowAsync();
         consumer.Lifecycle.Should().Contain("StartInternal");
+        mockLogger.VerifyLog(LogLevel.Information, s => s == "Starting up...");
+        mockLogger.VerifyLog(LogLevel.Information, s => s == "Started ok!");
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_NoConnection_ThrowsException()
+    {
+        // Arrange
+        using var sut = GetBasicSut(out var mockConsumer, out var mockLogger, true);
+        mockConsumer.Starting += (_, _) => throw new ArithmeticException("mathzz");
+        using var cts = new CancellationTokenSource(200);
+
+        // Act
+        var act = () => sut.StartAsync(cts.Token);
+
+        // Assert
+        await act.Should().NotThrowAsync();
+        mockLogger.VerifyLog(LogLevel.Warning, s => s!.StartsWith("Failed to start"));
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_InstantCancel_DoesNotThrow()
+    {
+        // Arrange
+        using var sut = GetBasicSut(out var mockConsumer, out var mockLogger, true);
+        using var cts = new CancellationTokenSource(1);
+        await Task.Delay(50);
+
+        // Act
+        var act = () => sut.StartAsync(cts.Token);
+
+        // Assert
+        await act.Should().NotThrowAsync();
     }
 
     private static ConsumerHostingService<GenericConsumer> GetBasicSut(

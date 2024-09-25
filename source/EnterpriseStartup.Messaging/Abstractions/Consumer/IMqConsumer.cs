@@ -13,6 +13,11 @@ using Microsoft.Extensions.Hosting;
 public interface IMqConsumer : IHostedService
 {
     /// <summary>
+    /// Gets a value indicating whether the consumer is connected.
+    /// </summary>
+    public bool IsConnected { get; }
+
+    /// <summary>
     /// Gets the number of times the consumer will attempt processing before abandonment.
     /// </summary>
     public long? MaximumAttempts { get; }
