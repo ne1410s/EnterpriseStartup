@@ -27,10 +27,10 @@ public class ConsumerHostingServiceTests
     }
 
     [Fact]
-    public async Task StartAsync_FromCtor_DoesNotThrow()
+    public async Task StartAsync_FromCtor_LogsExpected()
     {
         // Arrange
-        using var sut = GetBasicSut(out var consumer, out _);
+        using var sut = GetBasicSut(out var consumer, out var mockLogger);
 
         // Act
         var act = async () =>
@@ -42,6 +42,8 @@ public class ConsumerHostingServiceTests
         // Assert
         await act.Should().NotThrowAsync();
         consumer.Lifecycle.Should().Contain("StartInternal");
+        mockLogger.VerifyLog(LogLevel.Information, s => s == "Starting up...");
+        mockLogger.VerifyLog(LogLevel.Information, s => s == "Started ok!");
     }
 
     [Fact]
