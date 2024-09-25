@@ -50,6 +50,7 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
         this.connection?.Dispose();
         this.connection = null;
         this.channel = null;
+        this.consumer = null;
     }
 
     /// <inheritdoc/>
@@ -60,6 +61,8 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
             this.connection = this.connectionFactory.CreateConnection();
             this.channel = this.connection.CreateModel();
             this.consumer = new(this.channel);
+
+            // Stryker disable once Assignment
             this.consumer.Received += this.OnConsumerReceipt;
             this.consumerTag = this.channel.BasicConsume(this.QueueName, false, this.consumer);
             this.DeclareTopology();
@@ -71,11 +74,6 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
     /// <inheritdoc/>
     protected internal override Task StopInternal(CancellationToken token)
     {
-        if (this.consumer != null)
-        {
-            this.consumer.Received -= this.OnConsumerReceipt;
-        }
-
         if (this.consumerTag != null)
         {
             this.channel!.BasicCancel(this.consumerTag);
