@@ -48,6 +48,8 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
         this.channel?.Close();
         this.connection?.Close();
         this.connection?.Dispose();
+        this.connection = null;
+        this.channel = null;
     }
 
     /// <inheritdoc/>
@@ -76,7 +78,7 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
 
         if (this.consumerTag != null)
         {
-            this.channel?.BasicCancel(this.consumerTag);
+            this.channel!.BasicCancel(this.consumerTag);
             this.consumerTag = null;
         }
 
@@ -114,7 +116,7 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
     private void OnMessageProcessed(object? sender, MqConsumerEventArgs args)
     {
         var deliveryTag = (ulong)args.DeliveryId;
-        this.channel?.BasicAck(deliveryTag, false);
+        this.channel!.BasicAck(deliveryTag, false);
     }
 
     private void OnMessageFailed(object? sender, MqFailedEventArgs args)

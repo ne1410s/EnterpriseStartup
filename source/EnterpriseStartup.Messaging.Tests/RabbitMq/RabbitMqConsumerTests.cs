@@ -289,6 +289,20 @@ public class RabbitMqConsumerTests
         count.Should().Be(1);
     }
 
+    [Fact]
+    public void IsConnected_NullConnection_ReturnsFalse()
+    {
+        // Arrange
+        var sut = GetSut<BasicConsumer>(out _);
+        sut.Dispose();
+
+        // Act
+        var result = sut.IsConnected;
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
     private static BasicDeliverEventArgs GetArgs(
         string json = "{}",
         Dictionary<string, object>? headers = null)
