@@ -61,11 +61,11 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
             this.connection = this.connectionFactory.CreateConnection();
             this.channel = this.connection.CreateModel();
             this.consumer = new(this.channel);
+            this.DeclareTopology();
 
             // Stryker disable once Assignment
             this.consumer.Received += this.OnConsumerReceipt;
             this.consumerTag = this.channel.BasicConsume(this.QueueName, false, this.consumer);
-            this.DeclareTopology();
         }
 
         return Task.CompletedTask;
