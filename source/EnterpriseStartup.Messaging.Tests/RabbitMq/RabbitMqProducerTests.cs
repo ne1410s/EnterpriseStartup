@@ -15,38 +15,43 @@ using RabbitMQ.Client;
 public class RabbitMqProducerTests
 {
     [Fact]
-    public void Ctor_NullFactory_ThrowsException()
+    public void Produce_Multiple_DeclaresExchangeOnce()
     {
         // Arrange
-        var factory = (IConnectionFactory)null!;
-
-        // Act
-        var act = () => new BasicProducer(factory);
-
-        // Assert
-        act.Should().Throw<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'connectionFactory')");
-    }
-
-    [Fact]
-    public void Ctor_NullReturningFactory_ThrowsException()
-    {
-        // Arrange
-        var mockFactory = new Mock<IConnectionFactory>();
-
-        // Act
-        var act = () => new BasicProducer(mockFactory.Object);
-
-        // Assert
-        act.Should().Throw<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'connectionFactory')");
-    }
-
-    [Fact]
-    public void Ctor_WithFactory_DeclaresExchange()
-    {
-        // Arrange & Act
         var sut = GetSut<BasicProducer>(out var mocks);
+        mocks.MockConnection.Setup(m => m.IsOpen).Returns(true);
+
+        // Act
+        sut.Produce(new(null));
+        sut.Produce(new(null));
+
+        // Assert
+        mocks.MockChannel.Verify(
+            m => m.ExchangeDeclare(sut.ExchangeName, ExchangeType.Direct, true, false, null),
+            Times.Once());
+    }
+
+    [Fact]
+    public void Produce_NotConnected_DeclaresExchange()
+    {
+        // Arrange
+        var sut = GetSut<BasicProducer>(out var mocks);
+
+        // Act
+        sut.Produce(new(null));
+
+        // Assert
+        mocks.MockChannel.Verify(m => m.ExchangeDeclare(sut.ExchangeName, ExchangeType.Direct, true, false, null));
+    }
+
+    [Fact]
+    public void Produce_WithFactory_DeclaresExchange()
+    {
+        // Arrange
+        var sut = GetSut<BasicProducer>(out var mocks);
+
+        // Act
+        sut.Produce(new(null));
 
         // Assert
         sut.IsConnected.Should().BeFalse();
@@ -59,6 +64,7 @@ public class RabbitMqProducerTests
     {
         // Arrange
         var sut = GetSut<BasicProducer>(out var mocks);
+        sut.Produce(new(null));
 
         // Act
         sut.Dispose();
