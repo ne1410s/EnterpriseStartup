@@ -75,6 +75,20 @@ public class RabbitMqProducerTests
     }
 
     [Fact]
+    public void Dispose_NullChannelAndConnection_DoesNotError()
+    {
+        // Arrange
+        var mockFactory = new Mock<IConnectionFactory>();
+        var sut = new BasicProducer(mockFactory.Object);
+
+        // Act
+        sut.Dispose();
+
+        // Assert!
+        1.Should().Be(1);
+    }
+
+    [Fact]
     public void Produce_WhenCalled_CallsBasicPublish()
     {
         // Arrange
