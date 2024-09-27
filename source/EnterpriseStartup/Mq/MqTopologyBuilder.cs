@@ -22,7 +22,7 @@ public class MqTopologyBuilder(IServiceCollection services)
         where T : MqConsumerBase
     {
         services
-            .AddScoped<T>()
+            .AddTransient<T>()
             .AddHostedService<ConsumerHostingService<T>>();
         return this;
     }
@@ -35,7 +35,7 @@ public class MqTopologyBuilder(IServiceCollection services)
     public MqTopologyBuilder AddMqProducer<T>()
         where T : class, IMqProducer
     {
-        services.AddScoped<T>();
+        services.AddTransient<T>();
         return this;
     }
 }
