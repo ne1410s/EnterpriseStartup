@@ -24,18 +24,22 @@ public static class CorsExtensions
     /// <param name="services">The services.</param>
     /// <param name="origins">The allowed origins.</param>
     /// <param name="headers">The allowed headers.</param>
+    /// <param name="exposedHeaders">The headers allowed to be exposed in responses.</param>
     /// <returns>The original parameter, for chainable commands.</returns>
     public static IServiceCollection AddEnterpriseCors(
         this IServiceCollection services,
         string[]? origins = null,
-        string[]? headers = null)
+        string[]? headers = null,
+        string[]? exposedHeaders = null)
     {
         headers = ["Authorization", "Content-Type", .. SignalRHeaders, .. headers ?? []];
+        exposedHeaders = ["Content-Disposition", .. exposedHeaders ?? []];
         return services.AddCors(o => o
             .AddPolicy(nameof(EnterpriseStartup), builder => builder
                 .AllowCredentials()
                 .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE")
                 .WithHeaders(headers)
+                .WithExposedHeaders(exposedHeaders)
                 .WithOrigins(origins?.Length > 0 ? origins : ["*"])
                 .SetIsOriginAllowedToAllowWildcardSubdomains()));
     }
