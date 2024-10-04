@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Authors>Paul Jones</Authors>
+    <Company>ne1410s</Company>
+    <Description>Provides blob abstractions and implementation.</Description>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <IncludeSymbols>True</IncludeSymbols>
+    <Nullable>enable</Nullable>
+    <PackageIcon>ICON.png</PackageIcon>
+    <PackageIconUrl>ICON.png</PackageIconUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/ne1410s/EnterpriseStartup</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>Enterprise Startup Extensions Azure Blob</PackageTags>
+    <RepositoryUrl>https://github.com/ne1410s/EnterpriseStartup</RepositoryUrl>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <TargetFramework>net6.0</TargetFramework>
+    <Title>$(AssemblyName)</Title>
+    <VersionPrefix>1.0.9</VersionPrefix>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" Visible="false" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="/" Visible="false" />
+    <None Include="../../ICON.png" Pack="true" PackagePath="/" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Analyse" Version="1.0.*" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.22.*" />
+    <PackageReference Include="FluentErrors" Version="1.0.*" />
+    <PackageReference Include="Microsoft.Extensions.Azure" Version="1.7.5" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.*" />
+    <PackageReference Include="System.Text.Json" Version="8.0.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EnterpriseStartup.Utils\EnterpriseStartup.Utils.csproj" />
+  </ItemGroup>
+
+</Project>
