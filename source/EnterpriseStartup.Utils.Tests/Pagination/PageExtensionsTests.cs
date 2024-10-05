@@ -16,11 +16,11 @@ public class PageExtensionsTests
     {
         // Arrange
         var source = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        var request = new PageRequest(PageSize: 2);
+        var request = new PageRequest(PageNumber: 3, PageSize: 2);
         var expected = new LazyPageResult<int>
         {
-            Data = [1, 3],
-            PageNumber = 1,
+            Data = [9],
+            PageNumber = 3,
             PageSize = 2,
         };
 

@@ -5,6 +5,7 @@
 namespace EnterpriseStartup.Blobs.Tests.AzureBlob;
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,22 +44,36 @@ public class FakeServiceClient(bool containerExists) : BlobServiceClient
 {
     public string Name { get; set; } = default!;
 
+    public FakeContainerClient? FakeContainer { get; set; }
+
     public override BlobContainerClient GetBlobContainerClient(string blobContainerName)
-        => new FakeContainerClient(containerExists);
+    {
+        this.FakeContainer = new FakeContainerClient(containerExists);
+        return this.FakeContainer;
+    }
 }
 
 public class FakeContainerClient(bool containerExists) : BlobContainerClient
 {
+    public Collection<string> Calls { get; } = [];
+
+    public Collection<BlobUploadOptions> Uploads { get; } = [];
+
     public override Task<Response<BlobContainerInfo>> CreateIfNotExistsAsync(
         PublicAccessType publicAccessType = PublicAccessType.None,
         IDictionary<string, string> metadata = null!,
         BlobContainerEncryptionScopeOptions encryptionScopeOptions = null!,
         CancellationToken cancellationToken = default)
     {
+        this.Calls.Add(nameof(this.CreateIfNotExistsAsync));
         return Task.FromResult<Response<BlobContainerInfo>>(null!);
     }
 
-    public override BlobClient GetBlobClient(string blobName) => new FakeBlobClient();
+    public override BlobClient GetBlobClient(string blobName)
+    {
+        this.Calls.Add($"{nameof(this.GetBlobClient)}_{blobName}");
+        return new FakeBlobClient(this);
+    }
 
     public override Task<Response<bool>> ExistsAsync(CancellationToken cancellationToken = default)
         => Task.FromResult<Response<bool>>(new FakeResponse<bool>(containerExists));
@@ -87,13 +102,14 @@ public class FakePage<T>(params T[] items) : Page<T>
     public override Response GetRawResponse() => new FakeResponse();
 }
 
-public class FakeBlobClient : BlobClient
+public class FakeBlobClient(FakeContainerClient parent) : BlobClient
 {
     public override Task<Response<BlobContentInfo>> UploadAsync(
         Stream content,
         BlobUploadOptions options,
         CancellationToken cancellationToken = default)
     {
+        parent.Uploads.Add(options);
         return Task.FromResult<Response<BlobContentInfo>>(new FakeResponse<BlobContentInfo>(default!));
     }
 
