@@ -43,6 +43,20 @@ public class AzureBlobRepositoryTests
     }
 
     [Fact]
+    public async Task UploadAsync_BlobError_ThrowsException()
+    {
+        // Arrange
+        var mockRepo = TestHelper.GetMockRepo(true, out _, true);
+        var testBlob = TestHelper.GetTestBlob();
+
+        // Act
+        var act = () => mockRepo.UploadAsync("c", "u", testBlob);
+
+        // Assert
+        await act.Should().ThrowAsync<DataStateException>();
+    }
+
+    [Fact]
     public async Task UploadAsync_WhenCalled_CreatesContainerIfNotExists()
     {
         // Arrange
@@ -133,10 +147,10 @@ public class AzureBlobRepositoryTests
         var mockRepo = TestHelper.GetMockRepo(containerExists: true, out var service);
 
         // Act
-        var result = await mockRepo.ListAsync("c", "u", new(2, 1));
+        var result = await mockRepo.ListAsync("c", "u", new(2, 2));
 
         // Assert
-        result.Data.First().FileName.Should().Be("mf2");
+        result.Data.First().FileName.Should().Be("mf3");
     }
 
     [Fact]
@@ -176,6 +190,19 @@ public class AzureBlobRepositoryTests
 
         // Assert
         service.FakeContainer!.Calls.Should().Contain(s => s.StartsWith("GetBlobClient_u/"));
+    }
+
+    [Fact]
+    public async Task DownloadAsync_BlobError_ThrowsException()
+    {
+        // Arrange
+        var mockRepo = TestHelper.GetMockRepo(true, out var service, true);
+
+        // Act
+        var act = () => mockRepo.DownloadAsync("c", "u", Guid.Empty);
+
+        // Assert
+        await act.Should().ThrowAsync<DataStateException>();
     }
 
     [Fact]
@@ -228,5 +255,18 @@ public class AzureBlobRepositoryTests
 
         // Assert
         service.FakeContainer!.Calls.Should().Contain(s => s.StartsWith("GetBlobClient_u/"));
+    }
+
+    [Fact]
+    public async Task DeleteAsync_BlobError_ThrowsException()
+    {
+        // Arrange
+        var mockRepo = TestHelper.GetMockRepo(true, out var service, true);
+
+        // Act
+        var act = () => mockRepo.DeleteAsync("c", "u", Guid.Empty);
+
+        // Assert
+        await act.Should().ThrowAsync<DataStateException>();
     }
 }

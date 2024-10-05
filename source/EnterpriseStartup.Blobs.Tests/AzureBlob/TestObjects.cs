@@ -19,10 +19,10 @@ using Microsoft.Extensions.Azure;
 
 public static class TestHelper
 {
-    public static AzureBlobRepository GetMockRepo(bool containerExists, out FakeServiceClient service)
+    public static AzureBlobRepository GetMockRepo(bool containerExists, out FakeServiceClient service, bool blobError = false)
     {
         var mockFactory = new Mock<IAzureClientFactory<BlobServiceClient>>();
-        var svc = new FakeServiceClient(containerExists);
+        var svc = new FakeServiceClient(containerExists, blobError);
         mockFactory
             .Setup(m => m.CreateClient(It.IsAny<string>()))
             .Returns((string s) =>
@@ -40,7 +40,7 @@ public static class TestHelper
     public static BlobData GetTestBlob() => new(new MemoryStream(), GetTestMeta());
 }
 
-public class FakeServiceClient(bool containerExists) : BlobServiceClient
+public class FakeServiceClient(bool containerExists, bool blobError) : BlobServiceClient
 {
     public string Name { get; set; } = default!;
 
@@ -48,12 +48,12 @@ public class FakeServiceClient(bool containerExists) : BlobServiceClient
 
     public override BlobContainerClient GetBlobContainerClient(string blobContainerName)
     {
-        this.FakeContainer = new FakeContainerClient(containerExists);
+        this.FakeContainer = new FakeContainerClient(containerExists, blobError);
         return this.FakeContainer;
     }
 }
 
-public class FakeContainerClient(bool containerExists) : BlobContainerClient
+public class FakeContainerClient(bool containerExists, bool blobError) : BlobContainerClient
 {
     public Collection<string> Calls { get; } = [];
 
@@ -72,11 +72,11 @@ public class FakeContainerClient(bool containerExists) : BlobContainerClient
     public override BlobClient GetBlobClient(string blobName)
     {
         this.Calls.Add($"{nameof(this.GetBlobClient)}_{blobName}");
-        return new FakeBlobClient(this);
+        return new FakeBlobClient(this, blobError);
     }
 
     public override Task<Response<bool>> ExistsAsync(CancellationToken cancellationToken = default)
-        => Task.FromResult<Response<bool>>(new FakeResponse<bool>(containerExists));
+        => Task.FromResult<Response<bool>>(new FakeResponse<bool>(containerExists, false));
 
     public override AsyncPageable<BlobItem> GetBlobsAsync(
         BlobTraits traits = BlobTraits.None,
@@ -92,7 +92,10 @@ public class FakeContainerClient(bool containerExists) : BlobContainerClient
         var fakeMeta2 = new Dictionary<string, string> { ["filename"] = "mf2" };
         var fakeItem2 = BlobsModelFactory.BlobItem($"b2/{Guid.Empty}", properties: fakeProps, metadata: fakeMeta2);
         var fakePage2 = new FakePage<BlobItem>(fakeItem2);
-        return AsyncPageable<BlobItem>.FromPages([fakePage1, fakePage2]);
+        var fakeMeta3 = new Dictionary<string, string> { ["filename"] = "mf3" };
+        var fakeItem3 = BlobsModelFactory.BlobItem($"b3/{Guid.Empty}", properties: fakeProps, metadata: fakeMeta3);
+        var fakePage3 = new FakePage<BlobItem>(fakeItem3);
+        return AsyncPageable<BlobItem>.FromPages([fakePage1, fakePage2, fakePage3]);
     }
 }
 
@@ -103,10 +106,10 @@ public class FakePage<T>(params T[] items) : Page<T>
 
     public override string? ContinuationToken => default;
 
-    public override Response GetRawResponse() => new FakeResponse();
+    public override Response GetRawResponse() => new FakeResponse(false);
 }
 
-public class FakeBlobClient(FakeContainerClient parent) : BlobClient
+public class FakeBlobClient(FakeContainerClient parent, bool blobError) : BlobClient
 {
     public override Task<Response<BlobContentInfo>> UploadAsync(
         Stream content,
@@ -114,12 +117,12 @@ public class FakeBlobClient(FakeContainerClient parent) : BlobClient
         CancellationToken cancellationToken = default)
     {
         parent.Uploads.Add(options);
-        return Task.FromResult<Response<BlobContentInfo>>(new FakeResponse<BlobContentInfo>(default!));
+        return Task.FromResult<Response<BlobContentInfo>>(new FakeResponse<BlobContentInfo>(default!, blobError));
     }
 
     public override Task<Response> DownloadToAsync(Stream destination)
     {
-        return Task.FromResult<Response>(new FakeResponse());
+        return Task.FromResult<Response>(new FakeResponse(blobError));
     }
 
     public override Task<Response<BlobProperties>> GetPropertiesAsync(
@@ -128,7 +131,7 @@ public class FakeBlobClient(FakeContainerClient parent) : BlobClient
     {
         var fakeMeta = new Dictionary<string, string> { ["filename"] = "mf1" };
         var fakeProps = BlobsModelFactory.BlobProperties(metadata: fakeMeta, contentLength: 212);
-        return Task.FromResult<Response<BlobProperties>>(new FakeResponse<BlobProperties>(fakeProps));
+        return Task.FromResult<Response<BlobProperties>>(new FakeResponse<BlobProperties>(fakeProps, false));
     }
 
     public override Task<Response<bool>> DeleteIfExistsAsync(
@@ -136,23 +139,23 @@ public class FakeBlobClient(FakeContainerClient parent) : BlobClient
         BlobRequestConditions conditions = null!,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<Response<bool>>(new FakeResponse<bool>(true));
+        return Task.FromResult<Response<bool>>(new FakeResponse<bool>(true, blobError));
     }
 }
 
-public class FakeResponse<T>(T value) : Response<T>
+public class FakeResponse<T>(T value, bool error) : Response<T>
 {
     public override T Value => value;
 
-    public override Response GetRawResponse() => new FakeResponse();
+    public override Response GetRawResponse() => new FakeResponse(error);
 }
 
 [ExcludeFromCodeCoverage]
-public class FakeResponse : Response
+public class FakeResponse(bool error) : Response
 {
     public override int Status => default;
 
-    public override bool IsError => default;
+    public override bool IsError => error;
 
     public override string ReasonPhrase => default!;
 
