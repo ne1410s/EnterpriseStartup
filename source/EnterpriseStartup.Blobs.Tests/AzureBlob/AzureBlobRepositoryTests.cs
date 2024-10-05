@@ -86,6 +86,19 @@ public class AzureBlobRepositoryTests
     }
 
     [Fact]
+    public async Task ListAsync_NullRequest_ThrowsException()
+    {
+        // Arrange
+        var mockRepo = TestHelper.GetMockRepo(containerExists: false, out _);
+
+        // Act
+        var act = () => mockRepo.ListAsync("c", "u", null!);
+
+        // Assert
+        await act.Should().ThrowAsync<DataStateException>();
+    }
+
+    [Fact]
     public async Task ListAsync_NoContainer_ReturnsEmpty()
     {
         // Arrange
@@ -101,6 +114,32 @@ public class AzureBlobRepositoryTests
     }
 
     [Fact]
+    public async Task ListAsync_WithContainer_GetsBlobs()
+    {
+        // Arrange
+        var mockRepo = TestHelper.GetMockRepo(containerExists: true, out var service);
+
+        // Act
+        await mockRepo.ListAsync("c", "u", new());
+
+        // Assert
+        service.FakeContainer!.Calls.Should().Contain(s => s.StartsWith("GetBlobsAsync_u/"));
+    }
+
+    [Fact]
+    public async Task ListAsync_WithPaging_ReturnsExpected()
+    {
+        // Arrange
+        var mockRepo = TestHelper.GetMockRepo(containerExists: true, out var service);
+
+        // Act
+        var result = await mockRepo.ListAsync("c", "u", new(2, 1));
+
+        // Assert
+        result.Data.First().FileName.Should().Be("mf2");
+    }
+
+    [Fact]
     public async Task ListAsync_WithContainer_ReturnsData()
     {
         // Arrange
@@ -110,7 +149,7 @@ public class AzureBlobRepositoryTests
         var result = await mockRepo.ListAsync("c", "u", new());
 
         // Assert
-        result.Data.Should().NotBeEmpty();
+        result.Data.First().FileSize.Should().Be(212);
     }
 
     [Fact]

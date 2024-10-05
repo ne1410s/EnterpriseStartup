@@ -84,11 +84,15 @@ public class FakeContainerClient(bool containerExists) : BlobContainerClient
         string prefix = null!,
         CancellationToken cancellationToken = default)
     {
-        var fakeProps = BlobsModelFactory.BlobItemProperties(true);
-        var fakeMeta = new Dictionary<string, string> { ["filename"] = "mf1" };
-        var fakeItem = BlobsModelFactory.BlobItem($"b1/{Guid.Empty}", properties: fakeProps, metadata: fakeMeta);
-        var fakePage1 = new FakePage<BlobItem>(fakeItem);
-        return AsyncPageable<BlobItem>.FromPages([fakePage1]);
+        this.Calls.Add($"{nameof(this.GetBlobsAsync)}_{prefix}");
+        var fakeProps = BlobsModelFactory.BlobItemProperties(true, contentLength: 212);
+        var fakeMeta1 = new Dictionary<string, string> { ["filename"] = "mf1" };
+        var fakeItem1 = BlobsModelFactory.BlobItem($"b1/{Guid.Empty}", properties: fakeProps, metadata: fakeMeta1);
+        var fakePage1 = new FakePage<BlobItem>(fakeItem1);
+        var fakeMeta2 = new Dictionary<string, string> { ["filename"] = "mf2" };
+        var fakeItem2 = BlobsModelFactory.BlobItem($"b2/{Guid.Empty}", properties: fakeProps, metadata: fakeMeta2);
+        var fakePage2 = new FakePage<BlobItem>(fakeItem2);
+        return AsyncPageable<BlobItem>.FromPages([fakePage1, fakePage2]);
     }
 }
 
@@ -123,7 +127,7 @@ public class FakeBlobClient(FakeContainerClient parent) : BlobClient
         CancellationToken cancellationToken = default)
     {
         var fakeMeta = new Dictionary<string, string> { ["filename"] = "mf1" };
-        var fakeProps = BlobsModelFactory.BlobProperties(metadata: fakeMeta);
+        var fakeProps = BlobsModelFactory.BlobProperties(metadata: fakeMeta, contentLength: 212);
         return Task.FromResult<Response<BlobProperties>>(new FakeResponse<BlobProperties>(fakeProps));
     }
 
