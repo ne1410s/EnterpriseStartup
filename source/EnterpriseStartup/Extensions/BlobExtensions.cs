@@ -5,6 +5,7 @@
 namespace EnterpriseStartup.Extensions;
 
 using System;
+using Azure.Storage.Blobs;
 using EnterpriseStartup.Blobs.Abstractions;
 using EnterpriseStartup.Blobs.AzureBlob;
 using FluentErrors.Extensions;
@@ -43,10 +44,20 @@ public static class BlobExtensions
             o.AddBlobServiceClient(permanent).WithName(Permanent);
         });
 
+        var timeout = TimeSpan.FromSeconds(5);
         services.AddScoped<IUserBlobRepository, AzureBlobRepository>()
             .AddHealthChecks()
-            .AddAzureBlobStorage(timeout: TimeSpan.FromSeconds(5));
+            .AddAzureBlobStorage(sp => ResolveClient(sp, true), name: "azure_blob_ephemeral", timeout: timeout)
+            .AddAzureBlobStorage(sp => ResolveClient(sp, false), name: "azure_blob_permanent", timeout: timeout);
 
         return services;
+    }
+
+    private static BlobServiceClient ResolveClient(IServiceProvider sp, bool ephemeral)
+    {
+        var factory = sp.GetRequiredService<IAzureClientFactory<BlobServiceClient>>();
+        return ephemeral
+            ? factory.CreateClient(IUserBlobRepository.Ephemeral)
+            : factory.CreateClient(IUserBlobRepository.Permanent);
     }
 }
