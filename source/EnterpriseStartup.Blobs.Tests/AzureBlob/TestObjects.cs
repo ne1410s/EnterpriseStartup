@@ -19,7 +19,8 @@ using Microsoft.Extensions.Azure;
 
 public static class TestHelper
 {
-    public static AzureBlobRepository GetMockRepo(bool containerExists, out FakeServiceClient service, bool blobError = false)
+    public static AzureBlobRepository GetMockRepo(
+        bool containerExists, out FakeServiceClient service, bool blobError = false)
     {
         var mockFactory = new Mock<IAzureClientFactory<BlobServiceClient>>();
         var svc = new FakeServiceClient(containerExists, blobError);
@@ -130,7 +131,7 @@ public class FakeBlobClient(FakeContainerClient parent, bool blobError) : BlobCl
         CancellationToken cancellationToken = default)
     {
         var fakeMeta = new Dictionary<string, string> { ["filename"] = "mf1" };
-        var fakeProps = BlobsModelFactory.BlobProperties(metadata: fakeMeta, contentLength: 212);
+        var fakeProps = BlobsModelFactory.BlobProperties(contentLength: 212, metadata: fakeMeta);
         return Task.FromResult<Response<BlobProperties>>(new FakeResponse<BlobProperties>(fakeProps, false));
     }
 
