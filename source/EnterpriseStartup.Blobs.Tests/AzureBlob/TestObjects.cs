@@ -17,7 +17,7 @@ using EnterpriseStartup.Blobs.Abstractions;
 using EnterpriseStartup.Blobs.AzureBlob;
 using Microsoft.Extensions.Azure;
 
-public static class TestHelper
+internal static class TestHelper
 {
     public static AzureBlobRepository GetMockRepo(
         bool containerExists, out FakeServiceClient service, bool blobError = false)
