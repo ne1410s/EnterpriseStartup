@@ -359,11 +359,11 @@ public class RabbitMqConsumerTests
     {
         return new()
         {
-           AttemptNumber = 1,
-           BornOn = 1,
-           DeliveryId = 1,
-           Message = "hi",
-           MessageGuid = Guid.NewGuid(),
+            AttemptNumber = 1,
+            BornOn = 1,
+            DeliveryId = 1,
+            Message = "hi",
+            MessageGuid = Guid.NewGuid(),
         };
     }
 

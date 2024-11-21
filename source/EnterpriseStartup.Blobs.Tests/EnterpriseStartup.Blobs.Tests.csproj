@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -19,7 +19,7 @@
     <PackageReference Include="Analyse.4Tests" Version="1.0.*" />
     <PackageReference Include="coverlet.collector" Version="6.0.*" />
     <PackageReference Include="FluentAssertions" Version="6.12.*" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.*" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.*" />
     <PackageReference Include="Moq" Version="4.20.*" />
     <PackageReference Include="xunit" Version="2.9.*" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.*" />

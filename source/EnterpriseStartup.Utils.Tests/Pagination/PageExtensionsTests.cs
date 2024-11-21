@@ -39,7 +39,7 @@ public class PageExtensionsTests
         var request = new PageRequest(PageSize: 3);
         var expected = new PageResult<int>
         {
-            Data = [ 2, 4, 6 ],
+            Data = [2, 4, 6],
             PageNumber = 1,
             PageSize = 3,
             TotalPages = 3,

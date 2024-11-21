@@ -144,7 +144,7 @@ public class AzureBlobRepositoryTests
     public async Task ListAsync_WithPaging_ReturnsExpected()
     {
         // Arrange
-        var mockRepo = TestHelper.GetMockRepo(containerExists: true, out var service);
+        var mockRepo = TestHelper.GetMockRepo(containerExists: true, out _);
 
         // Act
         var result = await mockRepo.ListAsync("c", "u", new(2, 2));

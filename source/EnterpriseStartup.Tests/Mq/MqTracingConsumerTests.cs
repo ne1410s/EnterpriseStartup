@@ -250,13 +250,13 @@ public class MqTracingConsumerTests
         ulong deliveryId = 1,
         string message = "{ \"hello\": \"world\" }",
         Guid? guid = null) => new()
-    {
-        AttemptNumber = attempt,
-        BornOn = born,
-        DeliveryId = deliveryId,
-        Message = message,
-        MessageGuid = guid ?? Guid.Empty,
-    };
+        {
+            AttemptNumber = attempt,
+            BornOn = born,
+            DeliveryId = deliveryId,
+            Message = message,
+            MessageGuid = guid ?? Guid.Empty,
+        };
 
     private static MqFailedEventArgs GetErrorArgs(
         bool? retry = null,
@@ -265,16 +265,16 @@ public class MqTracingConsumerTests
         long born = 10000000,
         ulong deliveryId = 1,
         string message = "{ \"hello\": \"world\" }",
-        Guid? guid = null) => new ()
-    {
-        Retry = retry,
-        Error = ex ?? new ArithmeticException("mathz fail"),
-        AttemptNumber = attempt,
-        BornOn = born,
-        DeliveryId = deliveryId,
-        Message = message,
-        MessageGuid = guid ?? Guid.Empty,
-    };
+        Guid? guid = null) => new()
+        {
+            Retry = retry,
+            Error = ex ?? new ArithmeticException("mathz fail"),
+            AttemptNumber = attempt,
+            BornOn = born,
+            DeliveryId = deliveryId,
+            Message = message,
+            MessageGuid = guid ?? Guid.Empty,
+        };
 
     private static T GetSut<T>(
         out BagOfMocks<T> mocks,
