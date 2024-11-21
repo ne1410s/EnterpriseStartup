@@ -23,6 +23,8 @@ public class NotificationsHubTests
         var fakeContext = new FakeContext(null);
         using var sut = new NotificationsHub();
         sut.Context = fakeContext;
+        _ = fakeContext.UserIdentifier;
+        _ = fakeContext.ConnectionAborted;
 
         // Act
         await sut.OnConnectedAsync();

@@ -37,12 +37,5 @@ public class BasicTracedConsumer : MqTracingConsumer<BasicPayload>
     public override string ExchangeName => TestHelper.TestExchangeName;
 
     public override Task ConsumeAsync(BasicPayload message, MqConsumerEventArgs args)
-    {
-        return message.SimulateRetry switch
-        {
-            true => throw new TransientFailureException(),
-            false => throw new PermanentFailureException(),
-            _ => Task.CompletedTask,
-        };
-    }
+        => Task.CompletedTask;
 }

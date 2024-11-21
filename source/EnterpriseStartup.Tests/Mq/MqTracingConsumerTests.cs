@@ -85,6 +85,19 @@ public class MqTracingConsumerTests
     }
 
     [Fact]
+    public async Task ConsumeAsync_WhenCalled_DoesNotThrow()
+    {
+        // Arrange
+        var sut = GetSut<BasicTracedConsumer>(out var mocks);
+
+        // Act
+        var act = () => sut.ConsumeAsync(null!, null!);
+
+        // Assert
+        await act.Should().NotThrowAsync();
+    }
+
+    [Fact]
     public void OnStarting_WhenCalled_WritesExpectedLogs()
     {
         // Arrange
@@ -249,13 +262,13 @@ public class MqTracingConsumerTests
         long born = 10000000,
         ulong deliveryId = 1,
         string message = "{ \"hello\": \"world\" }",
-        Guid? guid = null) => new()
+        Guid guid = default) => new()
         {
             AttemptNumber = attempt,
             BornOn = born,
             DeliveryId = deliveryId,
             Message = message,
-            MessageGuid = guid ?? Guid.Empty,
+            MessageGuid = guid,
         };
 
     private static MqFailedEventArgs GetErrorArgs(
@@ -265,7 +278,7 @@ public class MqTracingConsumerTests
         long born = 10000000,
         ulong deliveryId = 1,
         string message = "{ \"hello\": \"world\" }",
-        Guid? guid = null) => new()
+        Guid guid = default) => new()
         {
             Retry = retry,
             Error = ex ?? new ArithmeticException("mathz fail"),
@@ -273,7 +286,7 @@ public class MqTracingConsumerTests
             BornOn = born,
             DeliveryId = deliveryId,
             Message = message,
-            MessageGuid = guid ?? Guid.Empty,
+            MessageGuid = guid,
         };
 
     private static T GetSut<T>(

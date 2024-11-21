@@ -4,6 +4,7 @@
 
 namespace EnterpriseStartup.Tests;
 
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 
@@ -14,6 +15,7 @@ internal static class TestHelper
 {
     public const string TestExchangeName = "basic-thing";
 
+    [ExcludeFromCodeCoverage]
     public static void FireEvent<T>(
         this T source,
         string eventName,

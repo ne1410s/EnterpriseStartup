@@ -2,6 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
 using EnterpriseStartup.Messaging.Abstractions.Producer;
 using EnterpriseStartup.Mq;
@@ -49,8 +50,10 @@ public class MqTopologyBuilderTests
     }
 }
 
+[ExcludeFromCodeCoverage]
 public record FakeMessage(string Id);
 
+[ExcludeFromCodeCoverage]
 public class FakeConsumer : MqConsumerBase<FakeMessage>
 {
     public override string ExchangeName => "Exchange";
@@ -67,6 +70,7 @@ public class FakeConsumer : MqConsumerBase<FakeMessage>
         => throw new NotImplementedException();
 }
 
+[ExcludeFromCodeCoverage]
 public class FakeProducer : MqProducerBase<FakeMessage>
 {
     public override string ExchangeName => "Exchange";
