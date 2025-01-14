@@ -196,7 +196,7 @@ public class AzureBlobRepositoryTests
     public async Task DownloadAsync_BlobError_ThrowsException()
     {
         // Arrange
-        var mockRepo = TestHelper.GetMockRepo(true, out var service, true);
+        var mockRepo = TestHelper.GetMockRepo(true, out _, true);
 
         // Act
         var act = () => mockRepo.DownloadAsync("c", "u", Guid.Empty);
@@ -261,7 +261,7 @@ public class AzureBlobRepositoryTests
     public async Task DeleteAsync_BlobError_ThrowsException()
     {
         // Arrange
-        var mockRepo = TestHelper.GetMockRepo(true, out var service, true);
+        var mockRepo = TestHelper.GetMockRepo(true, out _, true);
 
         // Act
         var act = () => mockRepo.DeleteAsync("c", "u", Guid.Empty);

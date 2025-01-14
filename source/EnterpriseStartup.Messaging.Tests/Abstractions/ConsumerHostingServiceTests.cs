@@ -66,7 +66,7 @@ public class ConsumerHostingServiceTests
     public async Task ExecuteAsync_InstantCancel_DoesNotThrow()
     {
         // Arrange
-        using var sut = GetBasicSut(out var mockConsumer, out var mockLogger, true);
+        using var sut = GetBasicSut(out _, out _, true);
         using var cts = new CancellationTokenSource(1);
         await Task.Delay(50);
 

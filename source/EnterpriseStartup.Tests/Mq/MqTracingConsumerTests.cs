@@ -88,7 +88,7 @@ public class MqTracingConsumerTests
     public async Task ConsumeAsync_WhenCalled_DoesNotThrow()
     {
         // Arrange
-        var sut = GetSut<BasicTracedConsumer>(out var mocks);
+        var sut = GetSut<BasicTracedConsumer>(out _);
 
         // Act
         var act = () => sut.ConsumeAsync(null!, null!);

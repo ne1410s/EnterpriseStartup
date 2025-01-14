@@ -83,7 +83,7 @@ public class RabbitMqConsumerTests
             ["x-guid"] = messageGuid.ToByteArray(),
         };
 
-        var sut = GetSut<BasicConsumer>(out var mocks);
+        var sut = GetSut<BasicConsumer>(out _);
         var argsReceived = (MqConsumerEventArgs)null!;
         sut.MessageReceived += (_, args) => argsReceived = args;
 
@@ -216,7 +216,7 @@ public class RabbitMqConsumerTests
     public async Task ConsumeAsync_WhenPassing_DoesNotThrow()
     {
         // Arrange
-        var sut = GetSut<BasicConsumer>(out var mocks);
+        var sut = GetSut<BasicConsumer>(out _);
         var payload = new BasicPayload(null);
 
         // Act
@@ -230,7 +230,7 @@ public class RabbitMqConsumerTests
     public async Task ConsumeAsync_WhenTempFail_ThrowsExpected()
     {
         // Arrange
-        var sut = GetSut<BasicConsumer>(out var mocks);
+        var sut = GetSut<BasicConsumer>(out _);
         var payload = new BasicPayload(false);
 
         // Act
@@ -286,7 +286,7 @@ public class RabbitMqConsumerTests
     public async Task ConsumeAsync_WhenPermaFail_ThrowsExpected()
     {
         // Arrange
-        var sut = GetSut<BasicConsumer>(out var mocks);
+        var sut = GetSut<BasicConsumer>(out _);
         var payload = new BasicPayload(true);
 
         // Act
