@@ -167,6 +167,21 @@ public class AzureBlobRepositoryTests
     }
 
     [Fact]
+    public async Task ListAsync_MissingMetadata_StillReturnsData()
+    {
+        // Arrange
+        var mockRepo = TestHelper.GetMockRepo(containerExists: true, out _);
+
+        // Act
+        var result = await mockRepo.ListAsync("c", "u", new(2, 3));
+
+        // Assert
+        result.Data.ElementAt(0).FileName.Should().EndWith("1");
+        result.Data.ElementAt(1).FileName.Should().EndWith("2");
+        result.Data.ElementAt(2).FileName.Should().EndWith("3");
+    }
+
+    [Fact]
     public async Task DownloadAsync_WhenCalled_DoesNotThrow()
     {
         // Arrange

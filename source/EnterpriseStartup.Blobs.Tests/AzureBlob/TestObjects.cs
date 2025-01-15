@@ -56,6 +56,10 @@ public class FakeServiceClient(bool containerExists, bool blobError) : BlobServi
 
 public class FakeContainerClient(bool containerExists, bool blobError) : BlobContainerClient
 {
+    private static readonly Guid Guid01 = Guid.Parse("00000000-0000-0000-0000-000000000001");
+    private static readonly Guid Guid02 = Guid.Parse("00000000-0000-0000-0000-000000000002");
+    private static readonly Guid Guid03 = Guid.Parse("00000000-0000-0000-0000-000000000003");
+
     public Collection<string> Calls { get; } = [];
 
     public Collection<BlobUploadOptions> Uploads { get; } = [];
@@ -96,7 +100,13 @@ public class FakeContainerClient(bool containerExists, bool blobError) : BlobCon
         var fakeMeta3 = new Dictionary<string, string> { ["filename"] = "mf3" };
         var fakeItem3 = BlobsModelFactory.BlobItem($"b3/{Guid.Empty}", properties: fakeProps, metadata: fakeMeta3);
         var fakePage3 = new FakePage<BlobItem>(fakeItem3);
-        return AsyncPageable<BlobItem>.FromPages([fakePage1, fakePage2, fakePage3]);
+        var fakeItem4 = BlobsModelFactory.BlobItem($"b4/{Guid01}", properties: fakeProps, metadata: null);
+        var fakeMeta5 = new Dictionary<string, string> { ["filename"] = string.Empty };
+        var fakeItem5 = BlobsModelFactory.BlobItem($"b5/{Guid02}", properties: fakeProps, metadata: fakeMeta5);
+        var fakeMeta6 = new Dictionary<string, string>();
+        var fakeItem6 = BlobsModelFactory.BlobItem($"b6/{Guid03}", properties: fakeProps, metadata: fakeMeta6);
+        var fakePage4 = new FakePage<BlobItem>(fakeItem4, fakeItem5, fakeItem6);
+        return AsyncPageable<BlobItem>.FromPages([fakePage1, fakePage2, fakePage3, fakePage4]);
     }
 }
 

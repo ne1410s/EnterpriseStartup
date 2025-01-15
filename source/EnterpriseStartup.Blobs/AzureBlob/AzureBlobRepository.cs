@@ -46,12 +46,13 @@ public class AzureBlobRepository(IAzureClientFactory<BlobServiceClient> clientFa
         if (await container.ExistsAsync())
         {
             var skip = (request.PageNumber - 1) * request.PageSize;
-            var pageable = container.GetBlobsAsync(prefix: $"{userId}/");
+            var pageable = container.GetBlobsAsync(BlobTraits.Metadata, prefix: $"{userId}/");
             await foreach (var blob in pageable.Skip(skip).Take(request.PageSize))
             {
                 var size = blob.Properties.ContentLength ?? 0;
-                var blobName = blob.Metadata["filename"];
                 var blobRef = Guid.Parse(blob.Name.Split('/')[^1]);
+                var blobName = blob.Metadata?.TryGetValue("filename", out var fileName) == true ? fileName : null;
+                blobName = string.IsNullOrWhiteSpace(blobName) ? blobRef.ToString() : blobName;
                 data.Add(new(blobRef, blob.Properties.ContentType, blobName, size));
             }
         }

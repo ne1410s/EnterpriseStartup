@@ -32,8 +32,4 @@
     <PackageReference Include="System.Text.Json" Version="9.0.*" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Update="SonarAnalyzer.CSharp" Version="10.5.0.109200" />
-  </ItemGroup>
-
 </Project>
