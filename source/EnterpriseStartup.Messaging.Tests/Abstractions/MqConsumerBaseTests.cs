@@ -57,6 +57,10 @@ public class MqConsumerBaseTests
     }
 
     [Fact]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Maintainability",
+        "CA1508:Avoid dead conditional code",
+        Justification = "Code is actually not dead!")]
     public async Task ConsumeInternal_LowerCaseJson_ParsesAsExpected()
     {
         // Arrange
