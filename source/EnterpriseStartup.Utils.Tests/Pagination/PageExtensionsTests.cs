@@ -28,7 +28,7 @@ public class PageExtensionsTests
         var result = source.PageLazily(request, n => n % 2 != 0);
 
         // Assert
-        result.Should().BeEquivalentTo(expected);
+        result.ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
@@ -50,6 +50,6 @@ public class PageExtensionsTests
         var result = source.Page(request, n => n % 2 == 0);
 
         // Assert
-        result.Should().BeEquivalentTo(expected);
+        result.ShouldBeEquivalentTo(expected);
     }
 }

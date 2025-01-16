@@ -5,7 +5,6 @@
 namespace EnterpriseStartup.Messaging.Tests.RabbitMq;
 
 using System.Text;
-using FluentAssertions;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
 using EnterpriseStartup.Messaging.RabbitMq;
 using RabbitMQ.Client;
@@ -40,8 +39,8 @@ public class RabbitMqConsumerTests
         var act = () => sut.TestConsumerReceipt(null!, null!);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentNullException>()
-            .WithMessage("Value cannot be null. (Parameter 'args')");
+        (await act.ShouldThrowAsync<ArgumentNullException>())
+            .Message.ShouldBe("Value cannot be null. (Parameter 'args')");
     }
 
     [Fact]
@@ -91,9 +90,9 @@ public class RabbitMqConsumerTests
         await sut.TestConsumerReceipt(null!, GetArgs(headers: headers));
 
         // Assert
-        argsReceived.BornOn.Should().Be(epoch);
-        argsReceived.AttemptNumber.Should().Be(42L);
-        argsReceived.MessageGuid.Should().Be(messageGuid);
+        argsReceived.BornOn.ShouldBe(epoch);
+        argsReceived.AttemptNumber.ShouldBe(42L);
+        argsReceived.MessageGuid.ShouldBe(messageGuid);
     }
 
     [Fact]
@@ -113,7 +112,7 @@ public class RabbitMqConsumerTests
         await sut.StopAsync(CancellationToken.None);
 
         // Assert
-        events.Should().BeEquivalentTo(expected);
+        events.ToArray().ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
@@ -180,8 +179,8 @@ public class RabbitMqConsumerTests
     {
         // Arrange
         var sut = GetSut<BasicConsumer>(out var mocks);
-        mocks.MockConnection.Setup(m => m.IsOpen).Returns(!closed);
-        mocks.MockChannel
+        _ = mocks.MockConnection.Setup(m => m.IsOpen).Returns(!closed);
+        _ = mocks.MockChannel
             .Setup(m => m.BasicConsume(
                 It.IsAny<string>(), false, string.Empty, false, false, null, It.IsAny<IBasicConsumer>()))
             .Returns(noTag ? null! : "tag");
@@ -223,7 +222,7 @@ public class RabbitMqConsumerTests
         var act = () => sut.ConsumeAsync(payload, GetMqArgs());
 
         // Assert
-        await act.Should().NotThrowAsync();
+        await act.ShouldNotThrowAsync();
     }
 
     [Fact]
@@ -237,8 +236,8 @@ public class RabbitMqConsumerTests
         var act = () => sut.ConsumeAsync(payload, GetMqArgs());
 
         // Assert
-        await act.Should().ThrowAsync<TransientFailureException>()
-            .WithMessage("transient failure");
+        (await act.ShouldThrowAsync<TransientFailureException>())
+            .Message.ShouldBe("transient failure");
     }
 
     [Fact]
@@ -248,10 +247,10 @@ public class RabbitMqConsumerTests
         var sut = GetSut<BasicConsumer>(out var mocks);
         var actualHeaders = (IDictionary<string, object>)null!;
         var actualExpiration = (string)null!;
-        mocks.MockProperties
+        _ = mocks.MockProperties
             .SetupSet(p => p.Headers = It.IsAny<IDictionary<string, object>>())
             .Callback<IDictionary<string, object>>(value => actualHeaders = value);
-        mocks.MockProperties
+        _ = mocks.MockProperties
             .SetupSet(p => p.Expiration = It.IsAny<string>())
             .Callback<string>(value => actualExpiration = value);
         var expectedKeys = new[] { "x-attempt", "x-born", "x-guid" };
@@ -260,9 +259,11 @@ public class RabbitMqConsumerTests
         await sut.TestConsumerReceipt(null!, GetArgs("{ \"PermaFail\": false }"));
 
         // Assert
-        actualExpiration.Should().NotBeNullOrEmpty();
-        actualHeaders.Keys.Should().Contain(expectedKeys);
-        actualHeaders["x-attempt"].Should().Be(2);
+        actualExpiration.ShouldNotBeNullOrEmpty();
+        actualHeaders.Keys.ShouldContain(expectedKeys[0]);
+        actualHeaders.Keys.ShouldContain(expectedKeys[1]);
+        actualHeaders.Keys.ShouldContain(expectedKeys[2]);
+        actualHeaders["x-attempt"].ShouldBe(2);
     }
 
     [Fact]
@@ -293,8 +294,8 @@ public class RabbitMqConsumerTests
         var act = () => sut.ConsumeAsync(payload, GetMqArgs());
 
         // Assert
-        await act.Should().ThrowAsync<PermanentFailureException>()
-            .WithMessage("permanent failure");
+        (await act.ShouldThrowAsync<PermanentFailureException>())
+            .Message.ShouldBe("permanent failure");
     }
 
     [Fact]
@@ -309,7 +310,7 @@ public class RabbitMqConsumerTests
         await sut.TestConsume(new BasicPayload(true), GetMqArgs());
 
         // Assert
-        count.Should().Be(1);
+        count.ShouldBe(1);
     }
 
     [Fact]
@@ -323,7 +324,7 @@ public class RabbitMqConsumerTests
         var result = sut.IsConnected;
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -331,13 +332,13 @@ public class RabbitMqConsumerTests
     {
         // Arrange
         var sut = GetSut<BasicConsumer>(out var mocks);
-        mocks.MockConnection.Setup(m => m.IsOpen).Returns(true);
+        _ = mocks.MockConnection.Setup(m => m.IsOpen).Returns(true);
 
         // Act
         var result = sut.IsConnected;
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     private static BasicDeliverEventArgs GetArgs(
@@ -345,7 +346,7 @@ public class RabbitMqConsumerTests
         Dictionary<string, object>? headers = null)
     {
         var mockProps = new Mock<IBasicProperties>();
-        mockProps
+        _ = mockProps
             .Setup(m => m.Headers)
             .Returns(headers!);
         return new()
@@ -375,20 +376,20 @@ public class RabbitMqConsumerTests
             new Mock<IConnection>(),
             new Mock<IBasicProperties>());
 
-        mocks.MockChannel
+        _ = mocks.MockChannel
             .Setup(m => m.CreateBasicProperties())
             .Returns(mocks.MockProperties.Object);
-        mocks.MockChannel
+        _ = mocks.MockChannel
             .Setup(m => m.BasicConsume(
                 It.IsAny<string>(), false, string.Empty, false, false, null, It.IsAny<IBasicConsumer>()))
             .Returns("tag");
 
-        mocks.MockConnection
+        _ = mocks.MockConnection
             .Setup(m => m.CreateModel())
             .Returns(mocks.MockChannel.Object);
 
         var mockConnectionFactory = new Mock<IConnectionFactory>();
-        mockConnectionFactory
+        _ = mockConnectionFactory
             .Setup(m => m.CreateConnection())
             .Returns(mocks.MockConnection.Object);
 

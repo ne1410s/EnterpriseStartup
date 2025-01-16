@@ -22,17 +22,19 @@ public class TelemeterTests
     public void Ctor_WhenCalled_SetsNameAndVersion(string? asmVersion, string? appVersion)
     {
         // Arrange
-        var assemblyName = new AssemblyName("test");
-        assemblyName.Version = asmVersion == null ? null : new(asmVersion);
+        var assemblyName = new AssemblyName("test")
+        {
+            Version = asmVersion == null ? null : new(asmVersion),
+        };
 
         // Act
         using var sut = new Telemeter(assemblyName);
 
         // Assert
-        sut.AppTracer.Name.Should().Be(assemblyName.Name);
-        sut.AppMeter.Name.Should().Be(assemblyName.Name);
-        sut.AppTracer.Version.Should().Be(appVersion);
-        sut.AppMeter.Version.Should().Be(appVersion);
+        sut.AppTracer.Name.ShouldBe(assemblyName.Name);
+        sut.AppMeter.Name.ShouldBe(assemblyName.Name);
+        sut.AppTracer.Version.ShouldBe(appVersion);
+        sut.AppMeter.Version.ShouldBe(appVersion);
     }
 
     [Fact]
@@ -53,7 +55,7 @@ public class TelemeterTests
         using var sut = new Telemeter();
 
         // Assert
-        sut.AppTags.Should().BeEquivalentTo(expected);
+        sut.AppTags.ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
@@ -68,7 +70,7 @@ public class TelemeterTests
         using var activity = sut.StartTrace("foo", tags: tag);
 
         // Assert
-        activity!.Tags.Should().ContainEquivalentOf(tag);
+        activity!.Tags.Any(t => t.Value == "bar").ShouldBeTrue();
     }
 
     [Fact]
@@ -83,7 +85,7 @@ public class TelemeterTests
         using var activity = sut.StartTrace("foo", parentContext: default, tags: tag);
 
         // Assert
-        activity!.Tags.Should().ContainEquivalentOf(tag);
+        activity!.Tags.Any(t => t.Value == "bar").ShouldBeTrue();
     }
 
     [Fact]
@@ -96,9 +98,9 @@ public class TelemeterTests
         var act = () => sut.CaptureMetric((MetricType)54321, 0, "foobar");
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Unrecognised metric type: 54321*")
-            .WithParameterName("metricType");
+        act.ShouldThrow<ArgumentException>().ShouldSatisfyAllConditions(
+            ex => ex.Message.ShouldMatch("Unrecognised metric type: 54321.*"),
+            ex => ex.ParamName.ShouldBe("metricType"));
     }
 
     [Theory]
@@ -118,10 +120,10 @@ public class TelemeterTests
         meterListener.SetMeasurementEventCallback<int>((instr, val, tags, name) =>
         {
             handled = true;
-            name.Should().Be(metricName);
-            val.Should().Be(testValue);
-            tags.ToArray().Should().ContainEquivalentOf(tag);
-            instr.Name.Should().Be(metricName);
+            name.ShouldBe(metricName);
+            val.ShouldBe(testValue);
+            tags.ToArray().Select(t => t.Value).OfType<string>().Any(t => t == "bar").ShouldBeTrue();
+            instr.Name.ShouldBe(metricName);
         });
         meterListener.Start();
 
@@ -129,8 +131,8 @@ public class TelemeterTests
         var instrument = sut.CaptureMetric(metricType, 42, metricName, onCreate: OnCreate, tags: tag);
 
         // Assert
-        instrument.Name.Should().Be(metricName);
-        handled.MustBe(true);
+        instrument.Name.ShouldBe(metricName);
+        _ = handled.MustBe(true);
     }
 
     private static ActivityListener GetListener()

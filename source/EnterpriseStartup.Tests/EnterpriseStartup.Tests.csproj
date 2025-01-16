@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -11,9 +11,9 @@
 
   <ItemGroup>
     <PackageReference Include="Analyse.4Tests" Version="1.*" />
-    <PackageReference Include="FluentAssertions" Version="8.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
     <PackageReference Include="Moq" Version="4.*" />
+    <PackageReference Include="Shouldly" Version="4.2.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.*" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.*" />
     <PackageReference Include="xunit" Version="2.*" />
@@ -32,8 +32,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="FluentAssertions" />
     <Using Include="Moq" />
+    <Using Include="Shouldly" />
     <Using Include="Xunit" />
   </ItemGroup>
 

@@ -4,7 +4,6 @@
 
 namespace EnterpriseStartup.Messaging.Tests.Abstractions;
 
-using FluentAssertions;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
 
 /// <summary>
@@ -22,7 +21,7 @@ public class MqConsumerBaseTests
         var sut = new GenericConsumer();
 
         // Assert
-        sut.QueueName.Should().Be(expected);
+        sut.QueueName.ShouldBe(expected);
     }
 
     [Fact]
@@ -35,8 +34,8 @@ public class MqConsumerBaseTests
         var act = () => sut.TestConsume(new BasicPayload(null), null!);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentNullException>()
-            .WithParameterName("args");
+        (await act.ShouldThrowAsync<ArgumentNullException>())
+            .ParamName.ShouldBe("args");
     }
 
     [Fact]
@@ -53,8 +52,8 @@ public class MqConsumerBaseTests
         await sut.StopAsync(CancellationToken.None);
 
         // Assert
-        count.Should().Be(1);
-        sut.ExchangeName.Should().Be(TestHelper.TestExchangeName);
+        count.ShouldBe(1);
+        sut.ExchangeName.ShouldBe(TestHelper.TestExchangeName);
     }
 
     [Fact]
@@ -70,7 +69,7 @@ public class MqConsumerBaseTests
         await sut.TestConsume(message, GetMqArgs(message: message));
 
         // Assert
-        didRetry.Should().BeTrue();
+        (didRetry ?? false).ShouldBeTrue();
     }
 
     [Fact]
@@ -87,8 +86,8 @@ public class MqConsumerBaseTests
         await sut.TestConsume(json, GetMqArgs(message: json));
 
         // Assert
-        ex.Should().BeOfType<PermanentFailureException>()
-            .Which.Message.Should().Be(expectedError);
+        ex.ShouldBeOfType<PermanentFailureException>()
+            .Message.ShouldBe(expectedError);
     }
 
     [Theory]
@@ -107,7 +106,7 @@ public class MqConsumerBaseTests
         await sut.TestConsume(new BasicPayload(false), GetMqArgs(attempt));
 
         // Assert
-        failArgs.Retry.Should().Be(expectRetry);
+        failArgs.Retry.ShouldBe(expectRetry);
     }
 
     [Fact]
@@ -117,11 +116,11 @@ public class MqConsumerBaseTests
         var sut = new GenericConsumer();
 
         // Act
-        var act = () => sut.TestDoRetry(null!);
+        Action act = () => sut.TestDoRetry(null!);
 
         // Assert
-        act.Should().Throw<ArgumentNullException>()
-            .WithParameterName("args");
+        act.ShouldThrow<ArgumentNullException>()
+            .ParamName.ShouldBe("args");
     }
 
     [Fact]
@@ -136,7 +135,7 @@ public class MqConsumerBaseTests
         await sut.StopAsync(CancellationToken.None);
 
         // Assert
-        sut.Lifecycle.Should().Equal(expected);
+        sut.Lifecycle.ToArray().ShouldBeEquivalentTo(expected);
     }
 
     private static MqConsumerEventArgs GetMqArgs(long attempt = 1, string message = "hi")

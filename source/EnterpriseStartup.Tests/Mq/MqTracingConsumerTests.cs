@@ -29,7 +29,7 @@ public class MqTracingConsumerTests
         var sut = GetSut<BasicTracedConsumer>(out _, "test", qValue, xValue);
 
         // Assert
-        sut.MaximumAttempts.Should().Be(qValue);
+        sut.MaximumAttempts.ShouldBe(qValue);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class MqTracingConsumerTests
         var sut = GetSut<BasicTracedConsumer>(out _, "test", qValue, xValue);
 
         // Assert
-        sut.MaximumAttempts.Should().Be(xValue);
+        sut.MaximumAttempts.ShouldBe(xValue);
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class MqTracingConsumerTests
         // Arrange
         var mockConnection = new Mock<IConnection>();
         var mockFactory = new Mock<IConnectionFactory>();
-        mockFactory.Setup(m => m.CreateConnection()).Returns(mockConnection.Object);
+        _ = mockFactory.Setup(m => m.CreateConnection()).Returns(mockConnection.Object);
 
         // Act
         var act = () => new BasicTracedConsumer(
@@ -62,7 +62,7 @@ public class MqTracingConsumerTests
             null!);
 
         // Assert
-        act.Should().Throw<ResourceMissingException>();
+        _ = act.ShouldThrow<ResourceMissingException>();
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public class MqTracingConsumerTests
         // Arrange
         var mockConnection = new Mock<IConnection>();
         var mockFactory = new Mock<IConnectionFactory>();
-        mockFactory.Setup(m => m.CreateConnection()).Returns(mockConnection.Object);
+        _ = mockFactory.Setup(m => m.CreateConnection()).Returns(mockConnection.Object);
 
         // Act
         var act = () => new BasicTracedConsumer(
@@ -81,7 +81,7 @@ public class MqTracingConsumerTests
             new Mock<IConfiguration>().Object);
 
         // Assert
-        act.Should().Throw<DataStateException>();
+        _ = act.ShouldThrow<DataStateException>();
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public class MqTracingConsumerTests
         var act = () => sut.ConsumeAsync(null!, null!);
 
         // Assert
-        await act.Should().NotThrowAsync();
+        await act.ShouldNotThrowAsync();
     }
 
     [Fact]
@@ -314,17 +314,17 @@ public class MqTracingConsumerTests
             new Mock<ILogger<T>>());
 
         var mockProps = new Mock<IBasicProperties>();
-        mocks.MockChannel
+        _ = mocks.MockChannel
             .Setup(m => m.CreateBasicProperties())
             .Returns(mockProps.Object);
 
         var mockConnection = new Mock<IConnection>();
-        mockConnection
+        _ = mockConnection
             .Setup(m => m.CreateModel())
             .Returns(mocks.MockChannel.Object);
 
         var mockConnectionFactory = new Mock<IConnectionFactory>();
-        mockConnectionFactory
+        _ = mockConnectionFactory
             .Setup(m => m.CreateConnection())
             .Returns(mockConnection.Object);
 

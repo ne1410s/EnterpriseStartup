@@ -25,7 +25,7 @@ public class AzureBlobRepositoryTests
         var result = await mockRepo.UploadAsync("c", "u", testBlob);
 
         // Assert
-        result.Should().NotBe(Guid.Empty);
+        result.ShouldNotBe(Guid.Empty);
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class AzureBlobRepositoryTests
         var act = () => mockRepo.UploadAsync("c", "u", testBlob);
 
         // Assert
-        await act.Should().ThrowAsync<DataStateException>();
+        _ = await act.ShouldThrowAsync<DataStateException>();
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class AzureBlobRepositoryTests
         var act = () => mockRepo.UploadAsync("c", "u", testBlob);
 
         // Assert
-        await act.Should().ThrowAsync<DataStateException>();
+        _ = await act.ShouldThrowAsync<DataStateException>();
     }
 
     [Fact]
@@ -64,10 +64,10 @@ public class AzureBlobRepositoryTests
         var testBlob = TestHelper.GetTestBlob();
 
         // Act
-        await mockRepo.UploadAsync("c", "u", testBlob);
+        _ = await mockRepo.UploadAsync("c", "u", testBlob);
 
         // Assert
-        service.FakeContainer!.Calls.Should().Contain(nameof(BlobContainerClient.CreateIfNotExistsAsync));
+        service.FakeContainer!.Calls.ShouldContain(nameof(BlobContainerClient.CreateIfNotExistsAsync));
     }
 
     [Fact]
@@ -78,10 +78,10 @@ public class AzureBlobRepositoryTests
         var testBlob = TestHelper.GetTestBlob();
 
         // Act
-        await mockRepo.UploadAsync("c", "u", testBlob);
+        _ = await mockRepo.UploadAsync("c", "u", testBlob);
 
         // Assert
-        service.FakeContainer!.Calls.Should().Contain(s => s.StartsWith("GetBlobClient_u/"));
+        service.FakeContainer!.Calls.ShouldContain(s => s.StartsWith("GetBlobClient_u/"));
     }
 
     [Fact]
@@ -93,10 +93,10 @@ public class AzureBlobRepositoryTests
         var expectedMeta = new Dictionary<string, string> { ["filename"] = "f1" };
 
         // Act
-        await mockRepo.UploadAsync("c", "u", testBlob);
+        _ = await mockRepo.UploadAsync("c", "u", testBlob);
 
         // Assert
-        service.FakeContainer!.Uploads[0].Metadata.Should().BeEquivalentTo(expectedMeta);
+        service.FakeContainer!.Uploads[0].Metadata.ShouldBeEquivalentTo(expectedMeta);
     }
 
     [Fact]
@@ -109,7 +109,7 @@ public class AzureBlobRepositoryTests
         var act = () => mockRepo.ListAsync("c", "u", null!);
 
         // Assert
-        await act.Should().ThrowAsync<DataStateException>();
+        _ = await act.ShouldThrowAsync<DataStateException>();
     }
 
     [Fact]
@@ -122,9 +122,9 @@ public class AzureBlobRepositoryTests
         var result = await mockRepo.ListAsync("c", "u", new());
 
         // Assert
-        result.Data.Should().BeEmpty();
-        result.PageSize.Should().Be(100);
-        result.PageNumber.Should().Be(1);
+        result.Data.ShouldBeEmpty();
+        result.PageSize.ShouldBe(100);
+        result.PageNumber.ShouldBe(1);
     }
 
     [Fact]
@@ -134,10 +134,10 @@ public class AzureBlobRepositoryTests
         var mockRepo = TestHelper.GetMockRepo(containerExists: true, out var service);
 
         // Act
-        await mockRepo.ListAsync("c", "u", new());
+        _ = await mockRepo.ListAsync("c", "u", new());
 
         // Assert
-        service.FakeContainer!.Calls.Should().Contain(s => s.StartsWith("GetBlobsAsync_u/"));
+        service.FakeContainer!.Calls.ShouldContain(s => s.StartsWith("GetBlobsAsync_u/"));
     }
 
     [Fact]
@@ -150,7 +150,7 @@ public class AzureBlobRepositoryTests
         var result = await mockRepo.ListAsync("c", "u", new(2, 2));
 
         // Assert
-        result.Data.First().FileName.Should().Be("mf3");
+        result.Data.First().FileName.ShouldBe("mf3");
     }
 
     [Fact]
@@ -163,7 +163,7 @@ public class AzureBlobRepositoryTests
         var result = await mockRepo.ListAsync("c", "u", new());
 
         // Assert
-        result.Data.First().FileSize.Should().Be(212);
+        result.Data.First().FileSize.ShouldBe(212);
     }
 
     [Fact]
@@ -176,9 +176,9 @@ public class AzureBlobRepositoryTests
         var result = await mockRepo.ListAsync("c", "u", new(2, 3));
 
         // Assert
-        result.Data.ElementAt(0).FileName.Should().EndWith("1");
-        result.Data.ElementAt(1).FileName.Should().EndWith("2");
-        result.Data.ElementAt(2).FileName.Should().EndWith("3");
+        result.Data.ElementAt(0).FileName.ShouldEndWith("1");
+        result.Data.ElementAt(1).FileName.ShouldEndWith("2");
+        result.Data.ElementAt(2).FileName.ShouldEndWith("3");
     }
 
     [Fact]
@@ -191,7 +191,7 @@ public class AzureBlobRepositoryTests
         var result = await mockRepo.DownloadAsync("c", "u", Guid.Empty);
 
         // Assert
-        result.MetaData.Should().NotBeNull();
+        _ = result.MetaData.ShouldNotBeNull();
     }
 
     [Fact]
@@ -201,10 +201,10 @@ public class AzureBlobRepositoryTests
         var mockRepo = TestHelper.GetMockRepo(true, out var service);
 
         // Act
-        await mockRepo.DownloadAsync("c", "u", Guid.Empty);
+        _ = await mockRepo.DownloadAsync("c", "u", Guid.Empty);
 
         // Assert
-        service.FakeContainer!.Calls.Should().Contain(s => s.StartsWith("GetBlobClient_u/"));
+        service.FakeContainer!.Calls.ShouldContain(s => s.StartsWith("GetBlobClient_u/"));
     }
 
     [Fact]
@@ -217,7 +217,7 @@ public class AzureBlobRepositoryTests
         var act = () => mockRepo.DownloadAsync("c", "u", Guid.Empty);
 
         // Assert
-        await act.Should().ThrowAsync<DataStateException>();
+        _ = await act.ShouldThrowAsync<DataStateException>();
     }
 
     [Fact]
@@ -230,7 +230,7 @@ public class AzureBlobRepositoryTests
         var act = () => mockRepo.DeleteAsync("c", "u", Guid.Empty);
 
         // Assert
-        await act.Should().NotThrowAsync();
+        await act.ShouldNotThrowAsync();
     }
 
     [Fact]
@@ -243,7 +243,7 @@ public class AzureBlobRepositoryTests
         await mockRepo.DeleteAsync("c", "u", Guid.Empty, ephemeral: true);
 
         // Assert
-        service.Name.Should().Be(IUserBlobRepository.Ephemeral);
+        service.Name.ShouldBe(IUserBlobRepository.Ephemeral);
     }
 
     [Fact]
@@ -256,7 +256,7 @@ public class AzureBlobRepositoryTests
         await mockRepo.DeleteAsync("c", "u", Guid.Empty, ephemeral: false);
 
         // Assert
-        service.Name.Should().Be(IUserBlobRepository.Permanent);
+        service.Name.ShouldBe(IUserBlobRepository.Permanent);
     }
 
     [Fact]
@@ -269,7 +269,7 @@ public class AzureBlobRepositoryTests
         await mockRepo.DeleteAsync("c", "u", Guid.Empty);
 
         // Assert
-        service.FakeContainer!.Calls.Should().Contain(s => s.StartsWith("GetBlobClient_u/"));
+        service.FakeContainer!.Calls.ShouldContain(s => s.StartsWith("GetBlobClient_u/"));
     }
 
     [Fact]
@@ -282,6 +282,6 @@ public class AzureBlobRepositoryTests
         var act = () => mockRepo.DeleteAsync("c", "u", Guid.Empty);
 
         // Assert
-        await act.Should().ThrowAsync<DataStateException>();
+        _ = await act.ShouldThrowAsync<DataStateException>();
     }
 }

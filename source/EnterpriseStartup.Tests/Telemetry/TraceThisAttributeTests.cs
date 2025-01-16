@@ -23,7 +23,7 @@ public class TraceThisAttributeTests
         using var sut = new TraceThisAttribute();
 
         // Assert
-        sut.Telemeter.Should().NotBeNull();
+        _ = sut.Telemeter.ShouldNotBeNull();
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public class TraceThisAttributeTests
         var act = () => sut.OnEntry(null!);
 
         // Assert
-        act.Should().Throw<ArgumentNullException>().WithParameterName("arg");
+        act.ShouldThrow<ArgumentNullException>().ParamName.ShouldBe("arg");
     }
 
     [Fact]
@@ -50,7 +50,7 @@ public class TraceThisAttributeTests
         sut.OnEntry(GetArgs());
 
         // Assert
-        sut.IsDisposed.Should().BeFalse();
+        (sut.IsDisposed ?? true).ShouldBeFalse();
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public class TraceThisAttributeTests
         using var activity = new Activity("test");
         using var sut = GetSut(out _, activity);
         using var ms = new MemoryStream();
-        Trace.Listeners.Add(new TextWriterTraceListener(ms));
+        _ = Trace.Listeners.Add(new TextWriterTraceListener(ms));
 
         // Act
         sut.OnEntry(GetArgs());
@@ -68,7 +68,7 @@ public class TraceThisAttributeTests
         // Assert
         Trace.Flush();
         var text = Encoding.UTF8.GetString(ms.ToArray());
-        text.Should().Contain(nameof(TraceThisAttributeTests));
+        text.ShouldContain(nameof(TraceThisAttributeTests));
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class TraceThisAttributeTests
         var act = () => sut.OnException(null!);
 
         // Assert
-        act.Should().Throw<ArgumentNullException>().WithParameterName("arg");
+        act.ShouldThrow<ArgumentNullException>().ParamName.ShouldBe("arg");
     }
 
     [Fact]
@@ -110,7 +110,7 @@ public class TraceThisAttributeTests
         var act = () => sut.OnException(GetErrorArgs());
 
         // Assert
-        act.Should().NotThrow();
+        act.ShouldNotThrow();
     }
 
     [Fact]
@@ -133,8 +133,8 @@ public class TraceThisAttributeTests
 
         // Assert
         var evt = activity.Events.Single();
-        evt.Name.Should().Be("exception");
-        evt.Tags.Should().BeEquivalentTo(expectedTags);
+        evt.Name.ShouldBe("exception");
+        evt.Tags.ToArray().ShouldBeEquivalentTo(expectedTags.ToArray());
     }
 
     [Fact]
@@ -147,7 +147,7 @@ public class TraceThisAttributeTests
         var act = () => sut.OnExit(null!);
 
         // Assert
-        act.Should().Throw<ResourceMissingException>();
+        _ = act.ShouldThrow<ResourceMissingException>();
     }
 
     [Fact]
@@ -160,7 +160,7 @@ public class TraceThisAttributeTests
         sut.OnExit(GetArgs());
 
         // Assert
-        sut.IsDisposed.Should().BeTrue();
+        (sut.IsDisposed ?? false).ShouldBeTrue();
     }
 
     [Fact]
@@ -174,7 +174,7 @@ public class TraceThisAttributeTests
         sut.OnExit(args);
 
         // Assert
-        sut.IsDisposed.Should().BeTrue();
+        (sut.IsDisposed ?? false).ShouldBeTrue();
     }
 
     [Fact]
@@ -188,7 +188,7 @@ public class TraceThisAttributeTests
         await Task.Delay(100);
 
         // Assert
-        sut.IsDisposed.Should().BeTrue();
+        (sut.IsDisposed ?? false).ShouldBeTrue();
     }
 
     private static TraceThisAttribute GetSut(
@@ -196,10 +196,10 @@ public class TraceThisAttributeTests
         Activity? activity = null)
     {
         mockTelemeter = new Mock<ITelemeter>();
-        mockTelemeter
+        _ = mockTelemeter
             .Setup(m => m.AppTracer)
             .Returns(activity?.Source!);
-        mockTelemeter
+        _ = mockTelemeter
             .Setup(m => m.StartTrace(
                 It.IsAny<string>(),
                 It.IsAny<ActivityKind>(),

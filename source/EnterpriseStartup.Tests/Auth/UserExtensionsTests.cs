@@ -23,7 +23,7 @@ public class UserExtensionsTests
         var act = principal.ToEnterpriseUser;
 
         // Assert
-        act.Should().Throw<DataStateException>();
+        _ = act.ShouldThrow<DataStateException>();
     }
 
     [Fact]
@@ -36,6 +36,6 @@ public class UserExtensionsTests
         var act = principal.ToEnterpriseUser;
 
         // Assert
-        act.Should().Throw<InvalidOperationException>();
+        _ = act.ShouldThrow<InvalidOperationException>();
     }
 }

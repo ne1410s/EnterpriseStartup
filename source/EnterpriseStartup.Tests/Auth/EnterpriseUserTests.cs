@@ -21,6 +21,6 @@ public class EnterpriseUserTests
         var user = new EnterpriseUser(id);
 
         // Assert
-        user.Id.Should().Be(id);
+        user.Id.ShouldBe(id);
     }
 }

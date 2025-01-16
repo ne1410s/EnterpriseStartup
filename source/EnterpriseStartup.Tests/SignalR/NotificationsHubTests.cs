@@ -30,7 +30,7 @@ public class NotificationsHubTests
         await sut.OnConnectedAsync();
 
         // Assert
-        fakeContext.Aborts.Should().Be(1);
+        fakeContext.Aborts.ShouldBe(1);
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class NotificationsHubTests
         await sut.OnConnectedAsync();
 
         // Assert
-        fakeContext.Aborts.Should().Be(1);
+        fakeContext.Aborts.ShouldBe(1);
     }
 
     [Fact]
@@ -61,7 +61,7 @@ public class NotificationsHubTests
         await sut.OnConnectedAsync();
 
         // Assert
-        NotificationsHub.ConnectedUsers.Keys.Should().Contain(userId);
+        NotificationsHub.ConnectedUsers.Keys.ShouldContain(userId);
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public class NotificationsHubTests
         await sut.OnConnectedAsync();
 
         // Assert
-        NotificationsHub.ConnectedUsers[userId].Count.Should().Be(2);
+        NotificationsHub.ConnectedUsers[userId].Count.ShouldBe(2);
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public class NotificationsHubTests
         await sut.OnDisconnectedAsync(null);
 
         // Assert
-        NotificationsHub.ConnectedUsers.Keys.Should().NotContain(userId);
+        NotificationsHub.ConnectedUsers.Keys.ShouldNotContain(userId);
     }
 
     private static ClaimsPrincipal GetUser(string id)

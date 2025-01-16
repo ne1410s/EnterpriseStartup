@@ -6,7 +6,6 @@ namespace EnterpriseStartup.Messaging.Tests.Abstractions;
 
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
 using EnterpriseStartup.Messaging.Tests;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -23,7 +22,7 @@ public class ConsumerHostingServiceTests
         var act = () => GetBasicSut(out _, out _, false);
 
         // Assert
-        act.Should().Throw<Exception>();
+        _ = act.ShouldThrow<Exception>();
     }
 
     [Fact]
@@ -40,8 +39,8 @@ public class ConsumerHostingServiceTests
         };
 
         // Assert
-        await act.Should().NotThrowAsync();
-        consumer.Lifecycle.Should().Contain("StartInternal");
+        await act.ShouldNotThrowAsync();
+        consumer.Lifecycle.ShouldContain("StartInternal");
         mockLogger.VerifyLog(LogLevel.Information, s => s == "Starting up...");
         mockLogger.VerifyLog(LogLevel.Information, s => s == "Started ok!");
     }
@@ -58,7 +57,7 @@ public class ConsumerHostingServiceTests
         var act = () => sut.StartAsync(cts.Token);
 
         // Assert
-        await act.Should().NotThrowAsync();
+        await act.ShouldNotThrowAsync();
         mockLogger.VerifyLog(LogLevel.Warning, s => s!.StartsWith("Failed to start"));
     }
 
@@ -74,7 +73,7 @@ public class ConsumerHostingServiceTests
         var act = () => sut.StartAsync(cts.Token);
 
         // Assert
-        await act.Should().NotThrowAsync();
+        await act.ShouldNotThrowAsync();
     }
 
     private static ConsumerHostingService<GenericConsumer> GetBasicSut(
@@ -85,8 +84,8 @@ public class ConsumerHostingServiceTests
         var mockChannel = new Mock<IModel>();
         var mockConnection = new Mock<IConnection>();
         var mockConnectionFactory = new Mock<IConnectionFactory>();
-        mockConnection.Setup(m => m.CreateModel()).Returns(mockChannel.Object);
-        mockConnectionFactory.Setup(m => m.CreateConnection()).Returns(mockConnection.Object);
+        _ = mockConnection.Setup(m => m.CreateModel()).Returns(mockChannel.Object);
+        _ = mockConnectionFactory.Setup(m => m.CreateConnection()).Returns(mockConnection.Object);
         consumer = new GenericConsumer(0);
         var mockScope = new Mock<IServiceScope>();
         var mockScopeFactory = new Mock<IServiceScopeFactory>();
@@ -94,17 +93,17 @@ public class ConsumerHostingServiceTests
         mockLogger = new Mock<ILogger>();
         var mockLogFactory = new Mock<ILoggerFactory>();
         var consumerType = consumer.GetType();
-        mockProvider.Setup(m => m.GetService(consumerType)).Returns(consumer);
+        _ = mockProvider.Setup(m => m.GetService(consumerType)).Returns(consumer);
         if (!resolveConsumerOk)
         {
-            mockProvider.Setup(m => m.GetService(consumerType)).Throws(new ArithmeticException("mathzz"));
+            _ = mockProvider.Setup(m => m.GetService(consumerType)).Throws(new ArithmeticException("mathzz"));
         }
 
-        mockProvider.Setup(m => m.GetService(typeof(IServiceScopeFactory))).Returns(mockScopeFactory.Object);
-        mockScope.Setup(m => m.ServiceProvider).Returns(mockProvider.Object);
-        mockScopeFactory.Setup(m => m.CreateScope()).Returns(mockScope.Object);
+        _ = mockProvider.Setup(m => m.GetService(typeof(IServiceScopeFactory))).Returns(mockScopeFactory.Object);
+        _ = mockScope.Setup(m => m.ServiceProvider).Returns(mockProvider.Object);
+        _ = mockScopeFactory.Setup(m => m.CreateScope()).Returns(mockScope.Object);
         var loggerCategory = $"ConsumerHostingService<{consumerType.Name}>";
-        mockLogFactory.Setup(m => m.CreateLogger(loggerCategory)).Returns(mockLogger.Object);
+        _ = mockLogFactory.Setup(m => m.CreateLogger(loggerCategory)).Returns(mockLogger.Object);
         return new ConsumerHostingService<GenericConsumer>(mockProvider.Object, mockLogFactory.Object);
     }
 }

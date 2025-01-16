@@ -24,7 +24,7 @@ public class FluentErrorsMiddlewareTests
         var act = () => sut.InvokeAsync(null!);
 
         // Assert
-        await act.Should().ThrowAsync<ResourceMissingException>();
+        _ = await act.ShouldThrowAsync<ResourceMissingException>();
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public class FluentErrorsMiddlewareTests
         var act = () => sut.InvokeAsync(new DefaultHttpContext());
 
         // Assert
-        await act.Should().NotThrowAsync();
+        await act.ShouldNotThrowAsync();
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class FluentErrorsMiddlewareTests
         await sut.InvokeAsync(context);
 
         // Assert
-        context.Response.StatusCode.Should().Be(500);
+        context.Response.StatusCode.ShouldBe(500);
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class FluentErrorsMiddlewareTests
         context.Response.Body.Position = 0;
         using var reader = new StreamReader(context.Response.Body);
         var response = await reader.ReadToEndAsync();
-        response.Should().Contain(nameof(ArithmeticException));
+        response.ShouldContain(nameof(ArithmeticException));
     }
 
     private static FluentErrorsMiddleware GetSut(

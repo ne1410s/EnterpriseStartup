@@ -18,9 +18,9 @@
   <ItemGroup>
     <PackageReference Include="Analyse.4Tests" Version="1.*" />
     <PackageReference Include="coverlet.collector" Version="6.*" />
-    <PackageReference Include="FluentAssertions" Version="8.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
     <PackageReference Include="Moq" Version="4.*" />
+    <PackageReference Include="Shouldly" Version="4.2.1" />
     <PackageReference Include="xunit" Version="2.*" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.*">
       <PrivateAssets>all</PrivateAssets>
@@ -33,8 +33,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="FluentAssertions" />
     <Using Include="Moq" />
+    <Using Include="Shouldly" />
     <Using Include="Xunit" />
   </ItemGroup>
 

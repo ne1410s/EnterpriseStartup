@@ -4,7 +4,6 @@
 
 namespace EnterpriseStartup.Messaging.Tests.RabbitMq;
 
-using FluentAssertions;
 using EnterpriseStartup.Messaging.Abstractions.Producer;
 using EnterpriseStartup.Messaging.RabbitMq;
 using RabbitMQ.Client;
@@ -19,7 +18,7 @@ public class RabbitMqProducerTests
     {
         // Arrange
         var sut = GetSut<BasicProducer>(out var mocks);
-        mocks.MockConnection.Setup(m => m.IsOpen).Returns(true);
+        _ = mocks.MockConnection.Setup(m => m.IsOpen).Returns(true);
 
         // Act
         sut.Produce(new(null));
@@ -54,7 +53,7 @@ public class RabbitMqProducerTests
         sut.Produce(new(null));
 
         // Assert
-        sut.IsConnected.Should().BeFalse();
+        sut.IsConnected.ShouldBeFalse();
         mocks.MockChannel.Verify(
             m => m.ExchangeDeclare(sut.ExchangeName, ExchangeType.Direct, true, false, null));
     }
@@ -85,7 +84,7 @@ public class RabbitMqProducerTests
         sut.Dispose();
 
         // Assert!
-        1.Should().Be(1);
+        1.ShouldBe(1);
     }
 
     [Fact]
@@ -122,7 +121,7 @@ public class RabbitMqProducerTests
         sut.Produce(new(null));
 
         // Assert
-        count.Should().Be(2);
+        count.ShouldBe(2);
     }
 
     private static T GetSut<T>(
@@ -134,20 +133,20 @@ public class RabbitMqProducerTests
             new Mock<IConnection>(),
             new Mock<IBasicProperties>());
 
-        mocks.MockProperties
+        _ = mocks.MockProperties
             .Setup(m => m.Headers)
             .Returns(new Dictionary<string, object>());
 
-        mocks.MockChannel
+        _ = mocks.MockChannel
             .Setup(m => m.CreateBasicProperties())
             .Returns(mocks.MockProperties.Object);
 
-        mocks.MockConnection
+        _ = mocks.MockConnection
             .Setup(m => m.CreateModel())
             .Returns(mocks.MockChannel.Object);
 
         var mockConnectionFactory = new Mock<IConnectionFactory>();
-        mockConnectionFactory
+        _ = mockConnectionFactory
             .Setup(m => m.CreateConnection())
             .Returns(mocks.MockConnection.Object);
 
