@@ -22,6 +22,7 @@ public sealed class ConsumerHostingService<TConsumer> : BackgroundService
 {
     private readonly ILogger logger;
     private readonly TConsumer consumer;
+    private readonly IServiceScope scope;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ConsumerHostingService{TConsumer}"/> class.
@@ -33,8 +34,15 @@ public sealed class ConsumerHostingService<TConsumer> : BackgroundService
         var consumerType = this.GetType().GetGenericArguments()[0];
         var loggerCategory = $"{nameof(ConsumerHostingService<TConsumer>)}<{consumerType.Name}>";
         this.logger = loggerFactory.MustExist().CreateLogger(loggerCategory)!;
-        using var scope = provider.CreateScope();
-        this.consumer = scope.ServiceProvider.GetRequiredService<TConsumer>();
+        this.scope = provider.CreateScope();
+        this.consumer = this.scope.ServiceProvider.GetRequiredService<TConsumer>();
+    }
+
+    /// <inheritdoc/>
+    public override void Dispose()
+    {
+        base.Dispose();
+        this.scope.Dispose();
     }
 
     /// <inheritdoc/>

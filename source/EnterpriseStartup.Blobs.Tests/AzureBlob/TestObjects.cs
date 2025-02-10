@@ -176,7 +176,9 @@ public class FakeResponse(bool error) : Response
 
     [SuppressMessage("Usage", "CA1816", Justification = "Because")]
     public override void Dispose()
-    { }
+    {
+        // Do nothing
+    }
 
     protected override bool ContainsHeader(string name) => default;
 

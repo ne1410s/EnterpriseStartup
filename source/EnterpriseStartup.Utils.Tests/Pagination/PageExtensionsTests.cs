@@ -25,7 +25,7 @@ public class PageExtensionsTests
         };
 
         // Act
-        var result = source.PageLazily(request, n => n % 2 != 0);
+        var result = source.AsQueryable().PageLazily(request, n => n % 2 != 0);
 
         // Assert
         result.ShouldBeEquivalentTo(expected);
@@ -47,7 +47,7 @@ public class PageExtensionsTests
         };
 
         // Act
-        var result = source.Page(request, n => n % 2 == 0);
+        var result = source.AsQueryable().Page(request, n => n % 2 == 0);
 
         // Assert
         result.ShouldBeEquivalentTo(expected);

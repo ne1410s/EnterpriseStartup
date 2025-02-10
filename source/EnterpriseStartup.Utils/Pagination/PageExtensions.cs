@@ -5,7 +5,6 @@
 namespace EnterpriseStartup.Utils.Pagination;
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -24,15 +23,21 @@ public static class PageExtensions
     /// <param name="where">Optional filter criteria.</param>
     /// <returns>A paging result.</returns>
     public static LazyPageResult<T> PageLazily<T>(
-        this IEnumerable<T> source,
+        this IQueryable<T> source,
         PageRequest request,
         Expression<Func<T, bool>>? where = null)
     {
         request ??= new PageRequest();
         var usedPage = Math.Clamp(request.PageNumber, 1, int.MaxValue);
         var usedSize = Math.Clamp(request.PageSize, 1, 1000);
-        var data = source.AsQueryable()
-            .Where(s => where == null || where.Compile()(s))
+        if (where != null)
+        {
+            source = source.Where(where);
+        }
+
+        // Stryker disable once linq
+        var data = source
+            .OrderBy(e => 1)
             .Skip((usedPage - 1) * usedSize)
             .Take(usedSize)
             .ToList();
@@ -54,7 +59,7 @@ public static class PageExtensions
     /// <param name="where">Optional filter criteria.</param>
     /// <returns>A paging result.</returns>
     public static PageResult<T> Page<T>(
-        this IEnumerable<T> source,
+        this IQueryable<T> source,
         PageRequest request,
         Expression<Func<T, bool>>? where = null)
     {
