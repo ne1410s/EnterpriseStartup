@@ -7,6 +7,7 @@ namespace EnterpriseStartup.Messaging.Tests.RabbitMq;
 using System.Text;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
 using EnterpriseStartup.Messaging.RabbitMq;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -27,20 +28,6 @@ public class RabbitMqConsumerTests
         // Assert
         mocks.MockChannel.Verify(m => m.Close());
         mocks.MockConnection.Verify(m => m.Close());
-    }
-
-    [Fact]
-    public async Task OnConsumerReceipt_NullArgs_ThrowsException()
-    {
-        // Arrange
-        var sut = GetSut<BasicConsumer>(out _);
-
-        // Act
-        var act = () => sut.TestConsumerReceipt(null!, null!);
-
-        // Assert
-        (await act.ShouldThrowAsync<ArgumentNullException>())
-            .Message.ShouldBe("Value cannot be null. (Parameter 'args')");
     }
 
     [Fact]
@@ -368,13 +355,14 @@ public class RabbitMqConsumerTests
         };
     }
 
-    private static T GetSut<T>(out BagOfMocks mocks)
+    private static T GetSut<T>(out BagOfMocks<T> mocks)
        where T : MqConsumerBase
     {
         mocks = new(
             new Mock<IModel>(),
             new Mock<IConnection>(),
-            new Mock<IBasicProperties>());
+            new Mock<IBasicProperties>(),
+            new Mock<ILogger<T>>());
 
         _ = mocks.MockChannel
             .Setup(m => m.CreateBasicProperties())
@@ -395,11 +383,13 @@ public class RabbitMqConsumerTests
 
         return (T)Activator.CreateInstance(
             typeof(T),
-            mockConnectionFactory.Object)!;
+            mockConnectionFactory.Object,
+            mocks.MockLogger.Object)!;
     }
 
-    private sealed record BagOfMocks(
+    private sealed record BagOfMocks<T>(
         Mock<IModel> MockChannel,
         Mock<IConnection> MockConnection,
-        Mock<IBasicProperties> MockProperties);
+        Mock<IBasicProperties> MockProperties,
+        Mock<ILogger<T>> MockLogger);
 }

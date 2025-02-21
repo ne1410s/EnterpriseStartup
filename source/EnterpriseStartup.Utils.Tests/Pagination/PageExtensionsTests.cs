@@ -42,8 +42,8 @@ public class PageExtensionsTests
             Data = [2, 4, 6],
             PageNumber = 1,
             PageSize = 3,
-            TotalPages = 3,
-            TotalRecords = 9,
+            TotalPages = 2,
+            TotalRecords = 4,
         };
 
         // Act

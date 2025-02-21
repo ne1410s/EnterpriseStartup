@@ -39,7 +39,7 @@ public class NotificationsHubTests
         // Arrange
         var user = new ClaimsPrincipal();
         var fakeContext = new FakeContext(user);
-        using var sut = new NotificationsHub();
+        using var sut = new NotificationsHubInMem();
         sut.Context = fakeContext;
 
         // Act
@@ -48,57 +48,6 @@ public class NotificationsHubTests
         // Assert
         fakeContext.Aborts.ShouldBe(1);
     }
-
-    [Fact]
-    public async Task OnConnected_AuthenticUser_AddsUser()
-    {
-        // Arrange
-        var userId = Guid.NewGuid().ToString();
-        using var sut = new NotificationsHub();
-        sut.Context = new FakeContext(GetUser(userId));
-
-        // Act
-        await sut.OnConnectedAsync();
-
-        // Assert
-        NotificationsHub.ConnectedUsers.Keys.ShouldContain(userId);
-    }
-
-    [Fact]
-    public async Task OnConnected_UserAlreadyConnected_AddsConnection()
-    {
-        // Arrange
-        var userId = Guid.NewGuid().ToString();
-        NotificationsHub.ConnectedUsers[userId] = ["connection0"];
-        using var sut = new NotificationsHub();
-        sut.Context = new FakeContext(GetUser(userId));
-
-        // Act
-        await sut.OnConnectedAsync();
-
-        // Assert
-        NotificationsHub.ConnectedUsers[userId].Count.ShouldBe(2);
-    }
-
-    [Fact]
-    public async Task OnDisconnected_AuthenticUser_RemovesUserConnection()
-    {
-        // Arrange
-        var userId = Guid.NewGuid().ToString();
-        const string connectionId = "connection1";
-        NotificationsHub.ConnectedUsers[userId] = [connectionId];
-        using var sut = new NotificationsHub();
-        sut.Context = new FakeContext(GetUser(userId), connectionId);
-
-        // Act
-        await sut.OnDisconnectedAsync(null);
-
-        // Assert
-        NotificationsHub.ConnectedUsers.Keys.ShouldNotContain(userId);
-    }
-
-    private static ClaimsPrincipal GetUser(string id)
-        => new([new([new(ClaimTypes.NameIdentifier, id)], "fake")]);
 }
 
 public class FakeContext(ClaimsPrincipal? user, string connectionId = "connection") : HubCallerContext

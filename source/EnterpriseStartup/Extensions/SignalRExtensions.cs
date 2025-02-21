@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using static StackExchange.Redis.RedisChannel;
 
 /// <summary>
 /// Extensions relating to SignalR.
@@ -32,8 +33,23 @@ public static class SignalRExtensions
     {
         configuration.MustExist();
         var hubUri = $"{configuration["HostedBaseUrl"]?.Trim('/')}/{HubPath.Trim('/')}";
-        services.AddSignalR();
-        services.AddScoped<INotifier, SignalRNotifier>()
+        var redis = configuration.GetConnectionString("Redis");
+        if (redis != null)
+        {
+            _ = services
+                .AddScoped<INotifier, SignalRNotifier>()
+                .AddSignalR()
+                .AddStackExchangeRedis(redis, opts =>
+                    opts.Configuration.ChannelPrefix = new("SignalR", PatternMode.Literal));
+        }
+        else
+        {
+            _ = services
+                .AddScoped<INotifier, SignalRInMemNotifier>()
+                .AddSignalR();
+        }
+
+        _ = services
             .AddHealthChecks()
             .AddSignalRHub(hubUri, tags: [HealthExtensions.NonVital]);
 
