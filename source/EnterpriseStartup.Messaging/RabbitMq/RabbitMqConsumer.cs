@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -21,6 +22,7 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
     private const string Tier2Route = "T2_DLQ";
 
     private readonly IConnectionFactory connectionFactory;
+    private readonly ILogger<RabbitMqConsumer<T>> logger;
 
     private IConnection? connection;
     private IModel? channel;
@@ -31,9 +33,11 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
     /// Initializes a new instance of the <see cref="RabbitMqConsumer{T}"/> class.
     /// </summary>
     /// <param name="connectionFactory">The connection factory.</param>
-    protected RabbitMqConsumer(IConnectionFactory connectionFactory)
+    /// <param name="logger">The logger.</param>
+    protected RabbitMqConsumer(IConnectionFactory connectionFactory, ILogger<RabbitMqConsumer<T>> logger)
     {
         this.connectionFactory = connectionFactory;
+        this.logger = logger;
         this.MessageFailed += this.OnMessageFailed;
         this.MessageProcessed += this.OnMessageProcessed;
     }
@@ -92,23 +96,30 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
     /// <returns>Async task.</returns>
     protected internal async Task OnConsumerReceipt(object sender, BasicDeliverEventArgs args)
     {
-        args = args ?? throw new ArgumentNullException(nameof(args));
-        var headers = args.BasicProperties.Headers ?? new Dictionary<string, object>();
-        var attempt = headers.TryGetValue("x-attempt", out var attemptObj) ? (long?)attemptObj : null;
-        var bornOn = headers.TryGetValue("x-born", out var bornObj) ? (long?)bornObj : null;
-        var msgGuid = headers.TryGetValue("x-guid", out var guidObj) ? new Guid((byte[])guidObj) : Guid.NewGuid();
-
-        var bytes = args.Body.ToArray();
-        var consumerArgs = new MqConsumerEventArgs
+        try
         {
-            AttemptNumber = attempt ?? 1,
-            BornOn = bornOn ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-            DeliveryId = args.DeliveryTag,
-            MessageGuid = msgGuid,
-            Message = Encoding.UTF8.GetString(bytes),
-            Headers = (Dictionary<string, object>)headers,
-        };
-        await this.ConsumeInternal(args.Body.ToArray(), consumerArgs);
+            args = args ?? throw new ArgumentNullException(nameof(args));
+            var headers = args.BasicProperties.Headers ?? new Dictionary<string, object>();
+            var attempt = headers.TryGetValue("x-attempt", out var attemptObj) ? (long?)attemptObj : null;
+            var bornOn = headers.TryGetValue("x-born", out var bornObj) ? (long?)bornObj : null;
+            var msgGuid = headers.TryGetValue("x-guid", out var guidObj) ? new Guid((byte[])guidObj) : Guid.NewGuid();
+
+            var bytes = args.Body.ToArray();
+            var consumerArgs = new MqConsumerEventArgs
+            {
+                AttemptNumber = attempt ?? 1,
+                BornOn = bornOn ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                DeliveryId = args.DeliveryTag,
+                MessageGuid = msgGuid,
+                Message = Encoding.UTF8.GetString(bytes),
+                Headers = (Dictionary<string, object>)headers,
+            };
+            await this.ConsumeInternal(args.Body.ToArray(), consumerArgs);
+        }
+        catch (Exception ex)
+        {
+            this.logger.LogWarning(ex, "Error on consumer receipt: {Summary}", $"{ex.GetType().Name} - ${ex.Message}");
+        }
     }
 
     private void OnMessageProcessed(object? sender, MqConsumerEventArgs args)

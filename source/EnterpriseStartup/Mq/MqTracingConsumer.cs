@@ -38,7 +38,7 @@ public abstract class MqTracingConsumer<T> : RabbitMqConsumer<T>
         ITelemeter telemeter,
         ILogger<MqTracingConsumer<T>> logger,
         IConfiguration config)
-            : base(connectionFactory)
+            : base(connectionFactory, logger)
     {
         this.telemeter = telemeter;
         this.logger = logger;
