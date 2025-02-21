@@ -36,6 +36,7 @@ public class MqTopologyBuilder(IServiceCollection services)
             .AddTransient(serviceType, implementationType)
             .AddKeyedTransient(serviceType, typeof(TConsumer).FullName, implementationType)
             .AddHostedService<ConsumerHostingService<TConsumer>>();
+
         return this;
     }
 
@@ -59,6 +60,7 @@ public class MqTopologyBuilder(IServiceCollection services)
             .AddTransient(implementationType)
             .AddTransient(serviceType, implementationType)
             .AddKeyedTransient(serviceType, typeof(TProducer).FullName, implementationType);
+
         return this;
     }
 
