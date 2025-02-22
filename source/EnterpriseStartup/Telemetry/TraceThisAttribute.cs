@@ -8,7 +8,6 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
-using FluentErrors.Extensions;
 using MethodBoundaryAspect.Fody.Attributes;
 
 /// <summary>
@@ -55,19 +54,20 @@ public sealed class TraceThisAttribute : OnMethodBoundaryAspect, IDisposable
     {
         try
         {
-            arg.MustExist();
-            if (arg.ReturnValue is Task task)
+            if (arg?.ReturnValue is Task task)
             {
                 await task;
             }
-
-            await Task.Delay(50);  // Small delay before disposal
-            this.Dispose();
         }
         catch (Exception ex)
         {
             Trace.TraceError($"OnExit encountered an error: {ex}");
             throw;  // Rethrow to preserve debugging info
+        }
+        finally
+        {
+            await Task.Delay(50);  // Small delay before disposal
+            this.Dispose();
         }
     }
 
