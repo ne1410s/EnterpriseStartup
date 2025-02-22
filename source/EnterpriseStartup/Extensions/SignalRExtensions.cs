@@ -22,6 +22,7 @@ public static class SignalRExtensions
     /// <summary>
     /// Adds the enterprise SignalR feature. This registers SignalR for startup health checks.
     /// This makes an <see cref="INotifier"/> available to DI, for sending server-to-client notices.
+    /// If a "Redis" connection string is found, it will be used as a backplane for SignalR.
     /// </summary>
     /// <param name="services">The services.</param>
     /// <param name="configuration">The configuration. For the health check to function, a config
@@ -61,11 +62,21 @@ public static class SignalRExtensions
     /// </summary>
     /// <typeparam name="T">The app builder type.</typeparam>
     /// <param name="app">The application builder.</param>
+    /// <param name="configuration">The configuration.</param>
     /// <returns>The original parameter, for chainable commands.</returns>
-    public static IApplicationBuilder UseEnterpriseSignalR<T>(this T app)
+    public static IApplicationBuilder UseEnterpriseSignalR<T>(this T app, IConfiguration configuration)
         where T : IApplicationBuilder, IEndpointRouteBuilder
     {
-        app.MapHub<NotificationsHub>(HubPath);
+        var isRedis = !string.IsNullOrEmpty(configuration.GetConnectionString("Redis"));
+        if (isRedis)
+        {
+            app.MapHub<NotificationsHub>(HubPath);
+        }
+        else
+        {
+            app.MapHub<NotificationsHubInMem>(HubPath);
+        }
+
         return app;
     }
 }
