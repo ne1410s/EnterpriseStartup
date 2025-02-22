@@ -51,20 +51,28 @@ public sealed class TraceThisAttribute : OnMethodBoundaryAspect, IDisposable
     }
 
     /// <inheritdoc/>
-    public override void OnExit(MethodExecutionArgs arg)
+    public override async void OnExit(MethodExecutionArgs arg)
     {
-        arg.MustExist();
-        if (arg.ReturnValue is Task task)
+        try
         {
-            task.ContinueWith(_ => this.Dispose(), TaskScheduler.Default);
-        }
-        else
-        {
+            arg.MustExist();
+            if (arg.ReturnValue is Task task)
+            {
+                await task;
+            }
+
+            await Task.Delay(50);  // Small delay before disposal
             this.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Trace.TraceError($"OnExit encountered an error: {ex}");
+            throw;  // Rethrow to preserve debugging info
         }
     }
 
     /// <inheritdoc/>
+    [DebuggerNonUserCode]
     public override void OnException(MethodExecutionArgs arg)
     {
         var ex = arg?.Exception ?? throw new ArgumentNullException(nameof(arg));
