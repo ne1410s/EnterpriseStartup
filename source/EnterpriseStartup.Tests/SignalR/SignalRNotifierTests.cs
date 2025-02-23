@@ -12,28 +12,30 @@ using Microsoft.AspNetCore.SignalR;
 /// </summary>
 public class SignalRInMemNotifierTests
 {
-    ////[Fact]
-    ////public async Task Notify_WhenCalled_SendsMessage()
-    ////{
-    ////    // Arrange
-    ////    var notice = new Notice(NoticeLevel.Success, "title", "text");
-    ////    var sut = GetSut(out var mockProxy);
-    ////    object?[] expected = [notice];
+    [Fact]
+    public async Task Notify_WhenCalled_SendsMessage()
+    {
+        // Arrange
+        var notice = new Notice(NoticeLevel.Success, "title", "text");
+        var sut = GetSut(out var mockProxy);
+        object?[] expected = [notice];
 
-    ////    // Act
-    ////    await sut.Notify("user1", notice);
+        // Act
+        await sut.Notify("user1", notice);
 
-    ////    // Assert
-    ////    mockProxy.Verify(m => m.SendCoreAsync("ReceiveMessage", expected, It.IsAny<CancellationToken>()));
-    ////}
+        // Assert
+        mockProxy.Verify(m => m.SendCoreAsync("ReceiveMessage", expected, It.IsAny<CancellationToken>()));
+    }
 
-    ////private static SignalRInMemNotifier GetSut(out Mock<IClientProxy> mockProxy)
-    ////{
-    ////    mockProxy = new();
-    ////    var mockHubClients = new Mock<IHubClients>();
-    ////    var mockHubContext = new Mock<IHubContext<NotificationsHubInMem>>();
-    ////    mockHubClients.Setup(m => m.Clients(It.IsAny<IReadOnlyList<string>>())).Returns(mockProxy.Object);
-    ////    mockHubContext.Setup(m => m.Clients).Returns(mockHubClients.Object);
-    ////    return new SignalRInMemNotifier(mockHubContext.Object);
-    ////}
+    private static SignalRInMemNotifier GetSut(out Mock<IClientProxy> mockProxy)
+    {
+        NotificationsHubInMem.ConnectedUsers["user1"] = ["blah"];
+
+        mockProxy = new();
+        var mockHubClients = new Mock<IHubClients>();
+        var mockHubContext = new Mock<IHubContext<NotificationsHubInMem>>();
+        mockHubClients.Setup(m => m.Clients(It.IsAny<IReadOnlyList<string>>())).Returns(mockProxy.Object);
+        mockHubContext.Setup(m => m.Clients).Returns(mockHubClients.Object);
+        return new SignalRInMemNotifier(mockHubContext.Object);
+    }
 }

@@ -6,6 +6,7 @@ namespace EnterpriseStartup.Telemetry;
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Threading.Tasks;
 using MethodBoundaryAspect.Fody.Attributes;
@@ -50,6 +51,7 @@ public sealed class TraceThisAttribute : OnMethodBoundaryAspect, IDisposable
     }
 
     /// <inheritdoc/>
+    [ExcludeFromCodeCoverage]
     public override async void OnExit(MethodExecutionArgs arg)
     {
         try

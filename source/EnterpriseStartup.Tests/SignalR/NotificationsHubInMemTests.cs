@@ -1,4 +1,4 @@
-﻿// <copyright file="NotificationsHubTests.cs" company="ne1410s">
+﻿// <copyright file="NotificationsHubInMemTests.cs" company="ne1410s">
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
@@ -12,16 +12,16 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.SignalR;
 
 /// <summary>
-/// Tests for the <see cref="NotificationsHub"/> class.
+/// Tests for the <see cref="NotificationsHubInMem"/> class.
 /// </summary>
-public class NotificationsHubTests
+public class NotificationsHubInMemTests
 {
     [Fact]
     public async Task OnConnected_NoUser_Aborts()
     {
         // Arrange
         var fakeContext = new FakeContext(null);
-        using var sut = new NotificationsHub();
+        using var sut = new NotificationsHubInMem();
         sut.Context = fakeContext;
         _ = fakeContext.UserIdentifier;
         _ = fakeContext.ConnectionAborted;
