@@ -12,7 +12,7 @@ using EnterpriseStartup.Auth;
 using Microsoft.AspNetCore.SignalR;
 
 /// <summary>
-/// SignalR notifications hub (in memory_.
+/// SignalR notifications hub (in memory).
 /// </summary>
 public class NotificationsHubInMem : Hub
 {

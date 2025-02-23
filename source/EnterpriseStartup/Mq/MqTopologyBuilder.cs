@@ -5,6 +5,7 @@
 namespace EnterpriseStartup.Mq;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
 using EnterpriseStartup.Messaging.Abstractions.Producer;
@@ -64,6 +65,7 @@ public class MqTopologyBuilder(IServiceCollection services)
         return this;
     }
 
+    [ExcludeFromCodeCoverage]
     private static Type GetConsumerServiceType<TConsumer>()
         where TConsumer : IMqConsumer
     {
@@ -76,6 +78,7 @@ public class MqTopologyBuilder(IServiceCollection services)
         return typeof(IMqConsumer<>).MakeGenericType(messageType);
     }
 
+    [ExcludeFromCodeCoverage]
     private static Type GetProducerServiceType<TProducer>()
         where TProducer : IMqProducer
     {

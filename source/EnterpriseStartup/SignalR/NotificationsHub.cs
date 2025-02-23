@@ -40,7 +40,14 @@ public class NotificationsHub : Hub
 
     private bool AuthenticUser(out string userId)
     {
-        userId = this.Context.User?.ToEnterpriseUser().Id!;
-        return !string.IsNullOrEmpty(userId);
+        userId = null!;
+        var principal = this.Context.User;
+        var hasAuth = principal?.Identity?.IsAuthenticated == true;
+        if (hasAuth)
+        {
+            userId = principal!.ToEnterpriseUser().Id;
+        }
+
+        return hasAuth;
     }
 }
