@@ -26,9 +26,12 @@ public class RedisCache(ILogger<RedisCache> logger, IDatabase redis) : ICache
         factory = factory ?? throw new ArgumentNullException(nameof(factory));
 
         T? retVal;
+        var found = false;
         try
         {
-            retVal = await this.GetDirectly<T>(key);
+            var retrieval = await this.TryGetDirectly<T>(key);
+            found = retrieval.found;
+            retVal = retrieval.value;
         }
         catch (Exception ex)
         {
@@ -36,7 +39,7 @@ public class RedisCache(ILogger<RedisCache> logger, IDatabase redis) : ICache
             retVal = default;
         }
 
-        if (retVal is null && !await redis.KeyExistsAsync(key))
+        if (!found && !await redis.KeyExistsAsync(key))
         {
             logger.LogInformation("Cache MISS on: {Key}", key);
 
@@ -44,11 +47,11 @@ public class RedisCache(ILogger<RedisCache> logger, IDatabase redis) : ICache
             try
             {
                 // Double-check in case another thread already populated it
-                retVal = await this.GetDirectly<T>(key);
-                if (retVal is null)
+                var retrieval = await this.TryGetDirectly<T>(key);
+                retVal = retrieval.value;
+                if (!retrieval.found)
                 {
                     retVal = await factory();
-
                     try
                     {
                         await this.SetDirectly(key, retVal, expiry);
@@ -73,10 +76,12 @@ public class RedisCache(ILogger<RedisCache> logger, IDatabase redis) : ICache
     }
 
     /// <inheritdoc/>
-    public async Task<T?> GetDirectly<T>(string key)
+    public async Task<(bool found, T? value)> TryGetDirectly<T>(string key)
     {
         var value = await redis.StringGetAsync(key);
-        return value.HasValue ? JsonSerializer.Deserialize<T>(value!) : default;
+        return !value.HasValue
+            ? (false, default)
+            : (true, JsonSerializer.Deserialize<T>(value!));
     }
 
     /// <inheritdoc/>

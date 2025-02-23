@@ -82,16 +82,17 @@ public class MemoryCacheTests
     }
 
     [Fact]
-    public async Task GetDirectly_NotFound_ReturnsDefault()
+    public async Task TryGetDirectly_NotFound_ReturnsDefault()
     {
         // Arrange
         var sut = GetSut(out _);
         const int expected = 0;
 
         // Act
-        var actual = await sut.GetDirectly<int>("myKey");
+        var (found, actual) = await sut.TryGetDirectly<int>("myKey");
 
         // Assert
+        found.ShouldBeFalse();
         actual.ShouldBe(expected);
     }
 
@@ -104,9 +105,10 @@ public class MemoryCacheTests
         await sut.SetDirectly("myKey", expected);
 
         // Act
-        var actual = await sut.GetDirectly<int>("myKey");
+        var (found, actual) = await sut.TryGetDirectly<int>("myKey");
 
         // Assert
+        found.ShouldBeTrue();
         actual.ShouldBe(expected);
     }
 

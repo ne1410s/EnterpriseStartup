@@ -32,8 +32,9 @@ public interface ICache
     /// </summary>
     /// <typeparam name="T">The value type.</typeparam>
     /// <param name="key">The key.</param>
-    /// <returns>The value.</returns>
-    public Task<T?> GetDirectly<T>(string key);
+    /// <returns>The return, include an indicator whether an entry was found.
+    /// This helps determine whether anything was actually stored.</returns>
+    public Task<(bool found, T? value)> TryGetDirectly<T>(string key);
 
     /// <summary>
     /// Sets a value direct to the store.

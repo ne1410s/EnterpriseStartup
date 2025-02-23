@@ -4,6 +4,7 @@
 
 namespace EnterpriseStartup.Tests.Caching;
 
+using System.Text.Json;
 using EnterpriseStartup.Caching;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
@@ -45,9 +46,10 @@ public class RedisCacheTests
     public async Task GetValue_AlreadyExists_UsesCache()
     {
         // Arrange
-        var sut = GetSut(out _, out _);
+        var sut = GetSut(out _, out var mockRedis);
         var expected = Guid.NewGuid();
-        await sut.SetDirectly("myKey", expected);
+        mockRedis.Setup(m => m.StringGetAsync("myKey", CommandFlags.None))
+            .ReturnsAsync(new RedisValue(JsonSerializer.Serialize(expected)));
 
         // Act
         var actual = await sut.GetValue("myKey", () => Task.FromResult(Guid.Empty));
@@ -73,31 +75,32 @@ public class RedisCacheTests
     }
 
     [Fact]
-    public async Task GetDirectly_NotFound_ReturnsDefault()
+    public async Task TryGetDirectly_NotFound_ReturnsDefault()
     {
         // Arrange
         var sut = GetSut(out _, out _);
-        const int expected = 0;
 
         // Act
-        var actual = await sut.GetDirectly<int>("myKey");
+        var (found, _) = await sut.TryGetDirectly<int>("myKey");
 
         // Assert
-        actual.ShouldBe(expected);
+        found.ShouldBeFalse();
     }
 
     [Fact]
     public async Task GetDirectly_IsFound_ReturnsValue()
     {
         // Arrange
-        var sut = GetSut(out _, out _);
+        var sut = GetSut(out _, out var mockRedis);
         const int expected = 42;
-        await sut.SetDirectly("myKey", expected);
+        mockRedis.Setup(m => m.StringGetAsync("myKey", CommandFlags.None))
+            .ReturnsAsync(new RedisValue(JsonSerializer.Serialize(expected)));
 
         // Act
-        var actual = await sut.GetDirectly<int>("myKey");
+        var (found, actual) = await sut.TryGetDirectly<int>("myKey");
 
         // Assert
+        found.ShouldBeTrue();
         actual.ShouldBe(expected);
     }
 

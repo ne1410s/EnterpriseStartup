@@ -40,10 +40,12 @@ public class MemoryCache(ILogger<MemoryCache> logger) : ICache
     }
 
     /// <inheritdoc/>
-    public Task<T?> GetDirectly<T>(string key)
+    public async Task<(bool found, T? value)> TryGetDirectly<T>(string key)
     {
-        var value = this.cache.TryGetValue(key, out var entry) ? (T?)entry.Value : default;
-        return Task.FromResult(value);
+        await Task.CompletedTask;
+        return !this.cache.TryGetValue(key, out var entry)
+            ? (false, default)
+            : (true, (T?)entry.Value);
     }
 
     /// <inheritdoc/>
