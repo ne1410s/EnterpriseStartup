@@ -15,7 +15,7 @@ public interface ICache
     /// <summary>
     /// Default cache expiry.
     /// </summary>
-    public static readonly TimeSpan DefaultExpiry = TimeSpan.FromMinutes(5);
+    public static readonly TimeSpan DefaultExpiry = TimeSpan.FromMinutes(10);
 
     /// <summary>
     /// Gets a value, with a fallback function to populate and reset it.

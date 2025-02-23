@@ -13,6 +13,16 @@ using Microsoft.Extensions.Logging;
 public class MemoryCacheTests
 {
     [Fact]
+    public void ICache_DefaultValue_IsExpected()
+    {
+        // Arrange & Act
+        var expected = TimeSpan.FromMinutes(10);
+
+        // Assert
+        ICache.DefaultExpiry.ShouldBe(expected);
+    }
+
+    [Fact]
     public async Task GetValue_NullFactory_ThrowsException()
     {
         // Arrange
