@@ -50,6 +50,6 @@ public interface ICache
     /// Removes a value directly from the store.
     /// </summary>
     /// <param name="key">The key.</param>
-    /// <returns>Async task.</returns>
-    public Task RemoveDirectly(string key);
+    /// <returns>True if entry was removed.</returns>
+    public Task<bool> RemoveDirectly(string key);
 }

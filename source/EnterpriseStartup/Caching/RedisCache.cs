@@ -92,5 +92,5 @@ public class RedisCache(ILogger<RedisCache> logger, IDatabase redis) : ICache
     }
 
     /// <inheritdoc/>
-    public async Task RemoveDirectly(string key) => await redis.KeyDeleteAsync(key);
+    public async Task<bool> RemoveDirectly(string key) => await redis.KeyDeleteAsync(key);
 }

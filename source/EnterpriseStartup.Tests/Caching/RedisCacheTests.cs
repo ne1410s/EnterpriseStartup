@@ -29,6 +29,43 @@ public class RedisCacheTests
     }
 
     [Fact]
+    public async Task GetValue_FailingInnerGet_LogsError()
+    {
+        // Arrange
+        var sut = GetSut(out var mockLogger, out var mockRedis);
+        var expected = Guid.NewGuid();
+        mockRedis.Setup(m => m.StringGetAsync(It.IsAny<RedisKey>(), CommandFlags.None)).Throws<Exception>();
+        mockRedis.Setup(m => m.KeyExistsAsync(It.IsAny<RedisKey>(), CommandFlags.None)).ReturnsAsync(true);
+
+        // Act
+        _ = await sut.GetValue("myKey", () => Task.FromResult(expected));
+
+        // Assert
+        mockLogger.VerifyLog(
+            LogLevel.Warning,
+            s => s!.StartsWith("Cache retrieval failed", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public async Task GetValue_FailingInnerSet_LogsError()
+    {
+        // Arrange
+        var sut = GetSut(out var mockLogger, out var mockRedis);
+        var expected = Guid.NewGuid();
+        mockRedis.Setup(m => m.StringSetAsync(
+            It.IsAny<RedisKey>(), It.IsAny<RedisValue>(), It.IsAny<TimeSpan?>(), false, default, default))
+                .Throws<Exception>();
+
+        // Act
+        _ = await sut.GetValue("myKey", () => Task.FromResult(expected));
+
+        // Assert
+        mockLogger.VerifyLog(
+            LogLevel.Warning,
+            s => s!.StartsWith("Failed to set cache", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public async Task GetValue_DoesNotExist_FactoryCalled()
     {
         // Arrange
@@ -102,6 +139,19 @@ public class RedisCacheTests
         // Assert
         found.ShouldBeTrue();
         actual.ShouldBe(expected);
+    }
+
+    [Fact]
+    public async Task RemoveDirectly_WhenCalled_CallsInnerRemove()
+    {
+        // Arrange
+        var sut = GetSut(out _, out var mockRedis);
+
+        // Act
+        _ = await sut.RemoveDirectly("myKey");
+
+        // Assert
+        mockRedis.Verify(m => m.KeyDeleteAsync("myKey", CommandFlags.None));
     }
 
     private static RedisCache GetSut(

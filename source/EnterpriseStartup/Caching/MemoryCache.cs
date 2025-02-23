@@ -49,10 +49,10 @@ public class MemoryCache(ILogger<MemoryCache> logger) : ICache
     }
 
     /// <inheritdoc/>
-    public Task RemoveDirectly(string key)
+    public Task<bool> RemoveDirectly(string key)
     {
-        this.cache.TryRemove(key, out _);
-        return Task.CompletedTask;
+        var retVal = this.cache.TryRemove(key, out _);
+        return Task.FromResult(retVal);
     }
 
     /// <inheritdoc/>
