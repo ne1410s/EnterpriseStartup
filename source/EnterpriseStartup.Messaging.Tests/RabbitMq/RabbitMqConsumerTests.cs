@@ -30,6 +30,20 @@ public class RabbitMqConsumerTests
     }
 
     [Fact]
+    public async Task OnConsumerReceipt_NullArgs_ThrowsException()
+    {
+        // Arrange
+        var sut = GetSut<BasicConsumer>(out _);
+
+        // Act
+        var act = () => sut.TestConsumerReceipt(null!, null!);
+
+        // Assert
+        (await act.ShouldThrowAsync<ArgumentNullException>())
+            .Message.ShouldBe("Value cannot be null. (Parameter 'args')");
+    }
+
+    [Fact]
     public async Task OnConsumerReceipt_WithValidJson_CallsMessageProcessed()
     {
         // Arrange
