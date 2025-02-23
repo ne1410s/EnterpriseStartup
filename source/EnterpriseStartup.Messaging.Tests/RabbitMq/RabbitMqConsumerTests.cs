@@ -7,7 +7,6 @@ namespace EnterpriseStartup.Messaging.Tests.RabbitMq;
 using System.Text;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
 using EnterpriseStartup.Messaging.RabbitMq;
-using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -361,8 +360,7 @@ public class RabbitMqConsumerTests
         mocks = new(
             new Mock<IModel>(),
             new Mock<IConnection>(),
-            new Mock<IBasicProperties>(),
-            new Mock<ILogger<T>>());
+            new Mock<IBasicProperties>());
 
         _ = mocks.MockChannel
             .Setup(m => m.CreateBasicProperties())
@@ -383,13 +381,11 @@ public class RabbitMqConsumerTests
 
         return (T)Activator.CreateInstance(
             typeof(T),
-            mockConnectionFactory.Object,
-            mocks.MockLogger.Object)!;
+            mockConnectionFactory.Object)!;
     }
 
     private sealed record BagOfMocks<T>(
         Mock<IModel> MockChannel,
         Mock<IConnection> MockConnection,
-        Mock<IBasicProperties> MockProperties,
-        Mock<ILogger<T>> MockLogger);
+        Mock<IBasicProperties> MockProperties);
 }

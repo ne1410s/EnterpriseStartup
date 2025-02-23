@@ -9,7 +9,6 @@ using System.Text;
 using System.Text.Json;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
 using EnterpriseStartup.Messaging.RabbitMq;
-using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -31,8 +30,8 @@ public class BasicProducer(IConnectionFactory factory)
 
 public class BasicConsumer : RabbitMqConsumer<BasicPayload>
 {
-    public BasicConsumer(IConnectionFactory factory, ILogger<RabbitMqConsumer<BasicPayload>> logger)
-        : base(factory, logger)
+    public BasicConsumer(IConnectionFactory factory)
+        : base(factory)
     {
         this.StartInternal(CancellationToken.None);
     }
