@@ -26,7 +26,7 @@ public class RedisCache(ILogger<RedisCache> logger, IDatabase redis) : ICache
         factory = factory ?? throw new ArgumentNullException(nameof(factory));
 
         T? retVal;
-        var found = false;
+        bool found;
         try
         {
             var retrieval = await this.TryGetDirectly<T>(key);
@@ -35,6 +35,7 @@ public class RedisCache(ILogger<RedisCache> logger, IDatabase redis) : ICache
         }
         catch (Exception ex)
         {
+            found = false;
             logger.LogWarning(ex, "Cache retrieval failed for key: {Key}", key);
             retVal = default;
         }

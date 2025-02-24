@@ -14,6 +14,8 @@ using StackExchange.Redis;
 /// </summary>
 public class RedisCacheTests
 {
+    private const StringComparison CIComparison = StringComparison.OrdinalIgnoreCase;
+
     [Fact]
     public async Task GetValue_NullFactory_ThrowsException()
     {
@@ -41,9 +43,7 @@ public class RedisCacheTests
         _ = await sut.GetValue("myKey", () => Task.FromResult(expected));
 
         // Assert
-        mockLogger.VerifyLog(
-            LogLevel.Warning,
-            s => s!.StartsWith("Cache retrieval failed", StringComparison.OrdinalIgnoreCase));
+        mockLogger.VerifyLog(LogLevel.Warning, s => s!.StartsWith("Cache retrieval failed", CIComparison));
     }
 
     [Fact]
@@ -60,16 +60,14 @@ public class RedisCacheTests
         _ = await sut.GetValue("myKey", () => Task.FromResult(expected));
 
         // Assert
-        mockLogger.VerifyLog(
-            LogLevel.Warning,
-            s => s!.StartsWith("Failed to set cache", StringComparison.OrdinalIgnoreCase));
+        mockLogger.VerifyLog(LogLevel.Warning, s => s!.StartsWith("Failed to set cache", CIComparison));
     }
 
     [Fact]
     public async Task GetValue_DoesNotExist_FactoryCalled()
     {
         // Arrange
-        var sut = GetSut(out _, out _);
+        var sut = GetSut(out var mockLogger, out _);
         var expected = Guid.NewGuid();
 
         // Act
@@ -77,13 +75,14 @@ public class RedisCacheTests
 
         // Assert
         actual.ShouldBe(expected);
+        mockLogger.VerifyLog(LogLevel.Information, s => s!.StartsWith("Cache miss", CIComparison));
     }
 
     [Fact]
     public async Task GetValue_AlreadyExists_UsesCache()
     {
         // Arrange
-        var sut = GetSut(out _, out var mockRedis);
+        var sut = GetSut(out var mockLogger, out var mockRedis);
         var expected = Guid.NewGuid();
         mockRedis.Setup(m => m.StringGetAsync("myKey", CommandFlags.None))
             .ReturnsAsync(new RedisValue(JsonSerializer.Serialize(expected)));
@@ -93,6 +92,7 @@ public class RedisCacheTests
 
         // Assert
         actual.ShouldBe(expected);
+        mockLogger.VerifyLog(LogLevel.Information, s => s!.StartsWith("Cache hit", CIComparison));
     }
 
     [Fact]
@@ -112,6 +112,21 @@ public class RedisCacheTests
     }
 
     [Fact]
+    public async Task SetValue_WithExpiry_PassesValue()
+    {
+        // Arrange
+        var sut = GetSut(out _, out var mockRedis);
+        var expected = TimeSpan.FromSeconds(2);
+
+        // Act
+        await sut.SetDirectly("myKey", 42, expected);
+
+        // Assert
+        mockRedis.Verify(
+            m => m.StringSetAsync(It.IsAny<RedisKey>(), It.IsAny<RedisValue>(), expected, false, default, default));
+    }
+
+    [Fact]
     public async Task TryGetDirectly_NotFound_ReturnsDefault()
     {
         // Arrange
@@ -125,7 +140,7 @@ public class RedisCacheTests
     }
 
     [Fact]
-    public async Task GetDirectly_IsFound_ReturnsValue()
+    public async Task TryGetDirectly_IsFound_ReturnsValue()
     {
         // Arrange
         var sut = GetSut(out _, out var mockRedis);

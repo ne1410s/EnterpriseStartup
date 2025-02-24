@@ -32,6 +32,20 @@ public class PageExtensionsTests
     }
 
     [Fact]
+    public void PageLazily_PageSizeEqualsCount_HasMoreIsFalse()
+    {
+        // Arrange
+        var source = new int[] { 1, 2, 3 };
+        var request = new PageRequest(PageSize: source.Length);
+
+        // Act
+        var result = source.AsQueryable().PageLazily(request);
+
+        // Assert
+        result.HasMore.ShouldBeFalse();
+    }
+
+    [Fact]
     public void Page_WhenCalled_ReturnsExpected()
     {
         // Arrange

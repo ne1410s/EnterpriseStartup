@@ -12,6 +12,8 @@ using Microsoft.Extensions.Logging;
 /// </summary>
 public class MemoryCacheTests
 {
+    private const StringComparison CIComparison = StringComparison.OrdinalIgnoreCase;
+
     [Fact]
     public void ICache_DefaultValue_IsExpected()
     {
@@ -40,7 +42,7 @@ public class MemoryCacheTests
     public async Task GetValue_DoesNotExist_FactoryCalled()
     {
         // Arrange
-        var sut = GetSut(out _);
+        var sut = GetSut(out var mockLogger);
         var expected = Guid.NewGuid();
 
         // Act
@@ -48,13 +50,14 @@ public class MemoryCacheTests
 
         // Assert
         actual.ShouldBe(expected);
+        mockLogger.VerifyLog(LogLevel.Information, s => s!.StartsWith("Cache miss", CIComparison));
     }
 
     [Fact]
     public async Task GetValue_AlreadyExists_UsesCache()
     {
         // Arrange
-        var sut = GetSut(out _);
+        var sut = GetSut(out var mockLogger);
         var expected = Guid.NewGuid();
         await sut.SetDirectly("myKey", expected);
 
@@ -63,6 +66,7 @@ public class MemoryCacheTests
 
         // Assert
         actual.ShouldBe(expected);
+        mockLogger.VerifyLog(LogLevel.Information, s => s!.StartsWith("Cache hit", CIComparison));
     }
 
     [Fact]
@@ -97,7 +101,7 @@ public class MemoryCacheTests
     }
 
     [Fact]
-    public async Task GetDirectly_IsFound_ReturnsValue()
+    public async Task TryGetDirectly_IsFound_ReturnsValue()
     {
         // Arrange
         var sut = GetSut(out _);

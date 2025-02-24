@@ -24,6 +24,8 @@ public class NotificationsHub : Hub
         }
 
         await this.Groups.AddToGroupAsync(this.Context.ConnectionId, userId);
+
+        // Stryker disable once Statement
         await base.OnConnectedAsync();
     }
 
@@ -35,6 +37,7 @@ public class NotificationsHub : Hub
             await this.Groups.RemoveFromGroupAsync(this.Context.ConnectionId, userId);
         }
 
+        // Stryker disable once Statement
         await base.OnDisconnectedAsync(exception);
     }
 
