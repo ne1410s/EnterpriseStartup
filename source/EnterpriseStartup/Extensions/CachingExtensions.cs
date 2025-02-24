@@ -35,7 +35,7 @@ public static class CachingExtensions
             _ = services
                 .AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(connection))
                 .AddScoped(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase())
-                .AddTransient<ICache, RedisCache>()
+                .AddScoped<ICache, RedisCache>()
                 .AddHealthChecks()
                 .AddRedis(connection, tags: ["non-vital"]);
         }
