@@ -7,6 +7,7 @@ namespace EnterpriseStartup.Tests.AI;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using EnterpriseStartup.AI;
+using FluentErrors.Errors;
 using Microsoft.Extensions.Options;
 
 /// <summary>
@@ -65,6 +66,20 @@ public class OpenAIClientTests
     }
 
     [Fact]
+    public async Task CompleteChat_ErrorResponse_ThrowsExpected()
+    {
+        // Arrange
+        var userContent = new { hello = string.Empty };
+        var client = GetSut(out _, _ => new(500, "{\"fale:\",true}"));
+
+        // Act
+        var act = client.CompleteChat<object>("1", userContent);
+
+        // Assert
+        await act.ShouldThrowAsync<HttpResponseException>();
+    }
+
+    [Fact]
     public async Task CompleteChat_QuotesInUserPayload_SendsExpectedContent()
     {
         // Arrange
@@ -75,9 +90,10 @@ public class OpenAIClientTests
         var client = GetSut(out var fakeHttpClient);
 
         // Act
-        await client.CompleteChat<object>("1", userContent, CancellationToken.None);
+        var result = await client.CompleteChat<object>("1", userContent, CancellationToken.None);
 
         // Assert
+        result.Usage.Tokens.ShouldBeGreaterThan(0);
         fakeHttpClient.Calls[0].Key.Body!.ShouldContain(expected);
         fakeHttpClient.Dispose();
     }

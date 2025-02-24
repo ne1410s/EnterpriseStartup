@@ -47,6 +47,22 @@ public class RedisCacheTests
     }
 
     [Fact]
+    public async Task GetValue_FailingInnerGetNoKey_LogsCacheMiss()
+    {
+        // Arrange
+        var sut = GetSut(out var mockLogger, out var mockRedis);
+        var expected = Guid.NewGuid();
+        mockRedis.Setup(m => m.StringGetAsync(It.IsAny<RedisKey>(), CommandFlags.None)).Throws<Exception>();
+        mockRedis.Setup(m => m.KeyExistsAsync(It.IsAny<RedisKey>(), CommandFlags.None)).ReturnsAsync(false);
+
+        // Act
+        _ = await sut.GetValue("myKey", () => Task.FromResult(expected));
+
+        // Assert
+        mockLogger.VerifyLog(LogLevel.Information, s => s!.StartsWith("Cache miss", CIComparison));
+    }
+
+    [Fact]
     public async Task GetValue_FailingInnerSet_LogsError()
     {
         // Arrange
@@ -60,7 +76,7 @@ public class RedisCacheTests
         _ = await sut.GetValue("myKey", () => Task.FromResult(expected));
 
         // Assert
-        mockLogger.VerifyLog(LogLevel.Warning, s => s!.StartsWith("Failed to set cache", CIComparison));
+        mockLogger.VerifyLog(LogLevel.Warning, s => s!.StartsWith("Failed to process cache", CIComparison));
     }
 
     [Fact]

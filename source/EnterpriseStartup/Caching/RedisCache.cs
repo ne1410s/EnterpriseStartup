@@ -53,15 +53,12 @@ public class RedisCache(ILogger<RedisCache> logger, IDatabase redis) : ICache
                 if (!retrieval.found)
                 {
                     retVal = await factory();
-                    try
-                    {
-                        await this.SetDirectly(key, retVal, expiry);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogWarning(ex, "Failed to set cache for key: {Key}", key);
-                    }
+                    await this.SetDirectly(key, retVal, expiry);
                 }
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to process cache for key: {Key}", key);
             }
             finally
             {

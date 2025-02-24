@@ -22,6 +22,7 @@ public class MemoryCache(ILogger<MemoryCache> logger) : ICache
         factory = factory ?? throw new ArgumentNullException(nameof(factory));
         if (this.cache.TryGetValue(key, out var cacheEntry))
         {
+            // Stryker disable once equality
             if (DateTimeOffset.UtcNow < cacheEntry.Expiry)
             {
                 logger.LogInformation("Cache HIT on: {Key}", key);
@@ -40,12 +41,13 @@ public class MemoryCache(ILogger<MemoryCache> logger) : ICache
     }
 
     /// <inheritdoc/>
-    public async Task<(bool found, T? value)> TryGetDirectly<T>(string key)
+    public Task<(bool found, T? value)> TryGetDirectly<T>(string key)
     {
-        await Task.CompletedTask;
-        return !this.cache.TryGetValue(key, out var entry)
+        var retVal = !this.cache.TryGetValue(key, out var entry)
             ? (false, default)
             : (true, (T?)entry.Value);
+
+        return Task.FromResult(retVal);
     }
 
     /// <inheritdoc/>

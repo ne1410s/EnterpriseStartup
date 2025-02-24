@@ -46,7 +46,6 @@ public static class PageExtensions
         }
         else
         {
-            // Stryker disable once linq
             source = source.OrderBy(e => 1); // Default ordering
         }
 

@@ -80,9 +80,28 @@ public class MemoryCacheTests
 
         // Act
         var actual = await sut.GetValue("myKey", () => Task.FromResult(expected));
+        var (_, value) = await sut.TryGetDirectly<Guid>("myKey");
 
         // Assert
         actual.ShouldBe(expected);
+        value.ShouldBe(expected);
+    }
+
+    [Fact]
+    public async Task GetValue_ExistsButExpiredFactoryErrors_ValueRemoved()
+    {
+        // Arrange
+        var sut = GetSut(out _);
+        await sut.SetDirectly("myKey", Guid.NewGuid(), TimeSpan.Zero);
+        await Task.Delay(50);
+
+        // Act
+        var act = () => sut.GetValue<Guid>("myKey", () => throw new ArgumentException("ra"));
+        await act.ShouldThrowAsync<ArgumentException>();
+        var (found, _) = await sut.TryGetDirectly<Guid>("myKey");
+
+        // Assert
+        found.ShouldBeFalse();
     }
 
     [Fact]
