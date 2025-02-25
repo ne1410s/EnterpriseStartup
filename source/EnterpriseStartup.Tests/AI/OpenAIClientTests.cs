@@ -4,6 +4,7 @@
 
 namespace EnterpriseStartup.Tests.AI;
 
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using EnterpriseStartup.AI;
@@ -99,6 +100,43 @@ public class OpenAIClientTests
     }
 
     [Fact]
+    public async Task CompleteChat_MultilinePrompt_GetsReplaced()
+    {
+        // Arrange
+        var userContent = new { hello = "\"Mr\" Smith" };
+        const string prompt = """
+            hello
+            there
+            """;
+        var client = GetSut(out var fakeHttpClient);
+
+        // Act
+        _ = await client.CompleteChat<ComplexResponse<string>>(prompt, userContent, CancellationToken.None);
+
+        // Assert
+        var request = fakeHttpClient.Calls[0].Key.Body!;
+        request.ShouldContain("{ \"role\": \"system\", \"content\": \"hello there\" },");
+        fakeHttpClient.Dispose();
+    }
+
+    [Fact]
+    public async Task CompleteChat_ComplexResponseType_RemovesProblematicJson()
+    {
+        // Arrange
+        var userContent = new { hello = "\"Mr\" Smith" };
+        var client = GetSut(out var fakeHttpClient);
+
+        // Act
+        _ = await client.CompleteChat<ComplexResponse<string>>("1", userContent, CancellationToken.None);
+
+        // Assert
+        var sanitisedRequest = Regex.Replace(fakeHttpClient.Calls[0].Key.Body!, "\\s+", " ");
+        sanitisedRequest.ShouldContain("\"anyOf\":");
+        sanitisedRequest.ShouldContain("\"Email\": { \"type\": \"string\" },");
+        fakeHttpClient.Dispose();
+    }
+
+    [Fact]
     public void ClientConfig_WhenCreated_HasExpected()
     {
         // Arrange & Act
@@ -153,4 +191,19 @@ public class OpenAIClientTests
             }
             """;
     }
+}
+
+/// <summary>
+/// Demo.
+/// </summary>
+/// <typeparam name="T">The type.</typeparam>
+public class ComplexResponse<T>
+{
+    [DataType(DataType.EmailAddress)]
+    public string Email { get; set; } = default!;
+
+    /// <summary>
+    /// Gets or sets the exer.
+    /// </summary>
+    public T Exer { get; set; } = default!;
 }

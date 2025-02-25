@@ -9,11 +9,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 /// <summary>
-/// A response container. Open AI / structured output does not support
-/// deserialisation into list-types.
+/// The response container.
 /// </summary>
-/// <typeparam name="T">The response type, which may be any serialisable
-/// type.</typeparam>
+/// <typeparam name="T">The response type.</typeparam>
 public class ResponseContainer<T>
 {
     /// <summary>
