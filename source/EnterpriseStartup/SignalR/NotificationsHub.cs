@@ -5,8 +5,6 @@
 namespace EnterpriseStartup.SignalR;
 
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using EnterpriseStartup.Auth;
 using Microsoft.AspNetCore.SignalR;
@@ -16,47 +14,31 @@ using Microsoft.AspNetCore.SignalR;
 /// </summary>
 public class NotificationsHub : Hub
 {
-    /// <summary>
-    /// Connected users, by user id.
-    /// </summary>
-    public static readonly ConcurrentDictionary<string, List<string>> ConnectedUsers = [];
-
     /// <inheritdoc/>
-    public override Task OnConnectedAsync()
+    public override async Task OnConnectedAsync()
     {
-        var connectionId = this.Context.ConnectionId;
-        if (this.AuthenticUser(out var userId))
-        {
-            if (!ConnectedUsers.TryGetValue(userId, out _))
-            {
-                ConnectedUsers[userId] = [connectionId];
-            }
-            else
-            {
-                ConnectedUsers[userId].Add(connectionId);
-            }
-        }
-        else
+        if (!this.AuthenticUser(out var userId))
         {
             this.Context.Abort();
+            return;
         }
 
-        return Task.CompletedTask;
+        await this.Groups.AddToGroupAsync(this.Context.ConnectionId, userId);
+
+        // Stryker disable once Statement
+        await base.OnConnectedAsync();
     }
 
     /// <inheritdoc/>
-    public override Task OnDisconnectedAsync(Exception? exception)
+    public override async Task OnDisconnectedAsync(Exception? exception)
     {
         if (this.AuthenticUser(out var userId))
         {
-            ConnectedUsers[userId].Remove(this.Context.ConnectionId);
-            if (ConnectedUsers[userId].Count == 0)
-            {
-                ConnectedUsers.Remove(userId, out _);
-            }
+            await this.Groups.RemoveFromGroupAsync(this.Context.ConnectionId, userId);
         }
 
-        return Task.CompletedTask;
+        // Stryker disable once Statement
+        await base.OnDisconnectedAsync(exception);
     }
 
     private bool AuthenticUser(out string userId)

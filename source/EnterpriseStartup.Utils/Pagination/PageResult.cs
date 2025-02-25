@@ -26,6 +26,11 @@ public record LazyPageResult<T>
     /// Gets the particular page.
     /// </summary>
     public ICollection<T> Data { get; init; } = [];
+
+    /// <summary>
+    /// Gets a value indicating whether there are more records beyond the current page.
+    /// </summary>
+    public bool HasMore { get; init; }
 }
 
 /// <summary>

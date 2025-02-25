@@ -117,9 +117,9 @@ public abstract class MqTracingConsumer<T> : RabbitMqConsumer<T>
     private void OnMessageFailed(object? sender, MqFailedEventArgs e)
     {
         var outcome = e.Retry == false ? "permanent error" : "transient error";
-
         this.logger.Log(
             e.Retry == false ? LogLevel.Error : LogLevel.Warning,
+            e.Error,
             "Mq {Outcome}: {Queue}#{BornOn} ({Attempt}x)",
             outcome,
             this.QueueName,

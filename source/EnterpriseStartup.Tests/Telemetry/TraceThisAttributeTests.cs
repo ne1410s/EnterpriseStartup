@@ -7,9 +7,9 @@ namespace EnterpriseStartup.Tests.Telemetry;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
-using FluentErrors.Errors;
-using MethodBoundaryAspect.Fody.Attributes;
+using System.Threading.Tasks;
 using EnterpriseStartup.Telemetry;
+using MethodBoundaryAspect.Fody.Attributes;
 
 /// <summary>
 /// Tests for the <see cref="TraceThisAttribute"/> class.
@@ -138,7 +138,7 @@ public class TraceThisAttributeTests
     }
 
     [Fact]
-    public void OnExit_NullArg_ThrowsException()
+    public void OnExit_NullArg_DoesNotThrow()
     {
         // Arrange
         using var sut = new TraceThisAttribute();
@@ -147,31 +147,37 @@ public class TraceThisAttributeTests
         var act = () => sut.OnExit(null!);
 
         // Assert
-        _ = act.ShouldThrow<ResourceMissingException>();
+        act.ShouldNotThrow();
     }
 
     [Fact]
-    public void OnExit_SyncMethod_CallsDispose()
+    public async Task OnExit_SyncMethod_CallsDispose()
     {
         // Arrange
         using var sut = GetSut(out _);
 
         // Act
-        sut.OnExit(GetArgs());
+        sut.OnExit(new MethodExecutionArgs
+        {
+            Method = MethodBase.GetCurrentMethod(),
+            ReturnValue = null,
+        });
+        await Task.Delay(100);
 
         // Assert
         (sut.IsDisposed ?? false).ShouldBeTrue();
     }
 
     [Fact]
-    public void OnExit_SyncMethodWithReturnValue_CallsDispose()
+    public async Task OnExit_SyncMethodWithReturnValue_CallsDispose()
     {
         // Arrange
         using var sut = GetSut(out _);
-        var args = GetArgs(returnValue: 42);
+        var args = await GetArgsAsync();
 
         // Act
         sut.OnExit(args);
+        await Task.Delay(100);
 
         // Assert
         (sut.IsDisposed ?? false).ShouldBeTrue();
@@ -225,7 +231,7 @@ public class TraceThisAttributeTests
         return new MethodExecutionArgs
         {
             Method = MethodBase.GetCurrentMethod(),
-            ReturnValue = Task.CompletedTask,
+            ReturnValue = Task.FromResult(3),
         };
     }
 

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using static StackExchange.Redis.RedisChannel;
 
 /// <summary>
 /// Extensions relating to SignalR.
@@ -21,6 +22,7 @@ public static class SignalRExtensions
     /// <summary>
     /// Adds the enterprise SignalR feature. This registers SignalR for startup health checks.
     /// This makes an <see cref="INotifier"/> available to DI, for sending server-to-client notices.
+    /// If a "Redis" connection string is found, it will be used as a backplane for SignalR.
     /// </summary>
     /// <param name="services">The services.</param>
     /// <param name="configuration">The configuration. For the health check to function, a config
@@ -32,8 +34,23 @@ public static class SignalRExtensions
     {
         configuration.MustExist();
         var hubUri = $"{configuration["HostedBaseUrl"]?.Trim('/')}/{HubPath.Trim('/')}";
-        services.AddSignalR();
-        services.AddScoped<INotifier, SignalRNotifier>()
+        var redis = configuration.GetConnectionString("Redis");
+        if (redis != null)
+        {
+            _ = services
+                .AddScoped<INotifier, SignalRNotifier>()
+                .AddSignalR()
+                .AddStackExchangeRedis(redis, opts =>
+                    opts.Configuration.ChannelPrefix = new("SignalR", PatternMode.Literal));
+        }
+        else
+        {
+            _ = services
+                .AddScoped<INotifier, SignalRInMemNotifier>()
+                .AddSignalR();
+        }
+
+        _ = services
             .AddHealthChecks()
             .AddSignalRHub(hubUri, tags: [HealthExtensions.NonVital]);
 
@@ -45,11 +62,21 @@ public static class SignalRExtensions
     /// </summary>
     /// <typeparam name="T">The app builder type.</typeparam>
     /// <param name="app">The application builder.</param>
+    /// <param name="configuration">The configuration.</param>
     /// <returns>The original parameter, for chainable commands.</returns>
-    public static IApplicationBuilder UseEnterpriseSignalR<T>(this T app)
+    public static IApplicationBuilder UseEnterpriseSignalR<T>(this T app, IConfiguration configuration)
         where T : IApplicationBuilder, IEndpointRouteBuilder
     {
-        app.MapHub<NotificationsHub>(HubPath);
+        var isRedis = !string.IsNullOrEmpty(configuration.GetConnectionString("Redis"));
+        if (isRedis)
+        {
+            app.MapHub<NotificationsHub>(HubPath);
+        }
+        else
+        {
+            app.MapHub<NotificationsHubInMem>(HubPath);
+        }
+
         return app;
     }
 }

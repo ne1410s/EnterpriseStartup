@@ -30,7 +30,7 @@
     <PackageReference Include="Analyse" Version="1.0.*" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.23.*" />
     <PackageReference Include="FluentErrors" Version="1.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Azure" Version="1.9.*" />
+    <PackageReference Include="Microsoft.Extensions.Azure" Version="1.10.*" />
     <PackageReference Include="System.Linq.Async" Version="6.0.*" />
     <PackageReference Include="System.Text.Json" Version="9.0.*" />
   </ItemGroup>

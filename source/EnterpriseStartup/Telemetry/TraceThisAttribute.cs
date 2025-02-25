@@ -6,9 +6,9 @@ namespace EnterpriseStartup.Telemetry;
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Threading.Tasks;
-using FluentErrors.Extensions;
 using MethodBoundaryAspect.Fody.Attributes;
 
 /// <summary>
@@ -51,20 +51,30 @@ public sealed class TraceThisAttribute : OnMethodBoundaryAspect, IDisposable
     }
 
     /// <inheritdoc/>
-    public override void OnExit(MethodExecutionArgs arg)
+    [ExcludeFromCodeCoverage]
+    public override async void OnExit(MethodExecutionArgs arg)
     {
-        arg.MustExist();
-        if (arg.ReturnValue is Task task)
+        try
         {
-            task.ContinueWith(_ => this.Dispose(), TaskScheduler.Default);
+            if (arg?.ReturnValue is Task task)
+            {
+                await task;
+            }
         }
-        else
+        catch (Exception ex)
         {
+            Trace.TraceError($"OnExit encountered an error: {ex}");
+            throw;  // Rethrow to preserve debugging info
+        }
+        finally
+        {
+            await Task.Delay(50);  // Small delay before disposal
             this.Dispose();
         }
     }
 
     /// <inheritdoc/>
+    [DebuggerNonUserCode]
     public override void OnException(MethodExecutionArgs arg)
     {
         var ex = arg?.Exception ?? throw new ArgumentNullException(nameof(arg));

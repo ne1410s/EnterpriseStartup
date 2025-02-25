@@ -1,4 +1,4 @@
-﻿// <copyright file="NotificationsHubTests.cs" company="ne1410s">
+﻿// <copyright file="NotificationsHubInMemTests.cs" company="ne1410s">
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
@@ -6,19 +6,18 @@ namespace EnterpriseStartup.Tests.SignalR;
 
 using System.Security.Claims;
 using EnterpriseStartup.SignalR;
-using Microsoft.AspNetCore.SignalR;
 
 /// <summary>
-/// Tests for the <see cref="NotificationsHub"/> class.
+/// Tests for the <see cref="NotificationsHubInMem"/> class.
 /// </summary>
-public class NotificationsHubTests
+public class NotificationsHubInMemTests
 {
     [Fact]
     public async Task OnConnected_NoUser_Aborts()
     {
         // Arrange
         var fakeContext = new FakeContext(null);
-        using var sut = new NotificationsHub();
+        using var sut = new NotificationsHubInMem();
         sut.Context = fakeContext;
         _ = fakeContext.UserIdentifier;
         _ = fakeContext.ConnectionAborted;
@@ -36,8 +35,7 @@ public class NotificationsHubTests
         // Arrange
         var user = new ClaimsPrincipal();
         var fakeContext = new FakeContext(user);
-        using var sut = new NotificationsHub();
-        sut.Groups = new Mock<IGroupManager>().Object;
+        using var sut = new NotificationsHubInMem();
         sut.Context = fakeContext;
 
         // Act
@@ -48,41 +46,51 @@ public class NotificationsHubTests
     }
 
     [Fact]
-    public async Task OnConnected_UserAlreadyConnected_AddsToGroup()
+    public async Task OnConnected_AuthenticUser_AddsUser()
     {
         // Arrange
         var userId = Guid.NewGuid().ToString();
-        const string connectionId = "connection1";
-        using var sut = new NotificationsHub();
-        var mockGroupManager = new Mock<IGroupManager>();
-        sut.Groups = mockGroupManager.Object;
-        sut.Context = new FakeContext(GetUser(userId), connectionId);
+        using var sut = new NotificationsHubInMem();
+        sut.Context = new FakeContext(GetUser(userId));
 
         // Act
         await sut.OnConnectedAsync();
 
         // Assert
-        mockGroupManager.Verify(
-            m => m.AddToGroupAsync(connectionId, userId, default));
+        NotificationsHubInMem.ConnectedUsers.Keys.ShouldContain(userId);
     }
 
     [Fact]
-    public async Task OnDisconnected_AuthenticUser_RemovesFromGroup()
+    public async Task OnConnected_UserAlreadyConnected_AddsConnection()
+    {
+        // Arrange
+        var userId = Guid.NewGuid().ToString();
+        NotificationsHubInMem.ConnectedUsers[userId] = ["connection0"];
+        using var sut = new NotificationsHubInMem();
+        sut.Context = new FakeContext(GetUser(userId));
+
+        // Act
+        await sut.OnConnectedAsync();
+
+        // Assert
+        NotificationsHubInMem.ConnectedUsers[userId].Count.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task OnDisconnected_AuthenticUser_RemovesUserConnection()
     {
         // Arrange
         var userId = Guid.NewGuid().ToString();
         const string connectionId = "connection1";
-        using var sut = new NotificationsHub();
-        var mockGroupManager = new Mock<IGroupManager>();
-        sut.Groups = mockGroupManager.Object;
+        NotificationsHubInMem.ConnectedUsers[userId] = [connectionId];
+        using var sut = new NotificationsHubInMem();
         sut.Context = new FakeContext(GetUser(userId), connectionId);
 
         // Act
         await sut.OnDisconnectedAsync(null);
 
         // Assert
-        mockGroupManager.Verify(
-            m => m.RemoveFromGroupAsync(connectionId, userId, default));
+        NotificationsHubInMem.ConnectedUsers.Keys.ShouldNotContain(userId);
     }
 
     private static ClaimsPrincipal GetUser(string id)
