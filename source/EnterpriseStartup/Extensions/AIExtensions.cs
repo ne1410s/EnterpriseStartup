@@ -43,7 +43,7 @@ public static class AIExtensions
             var clientConfig = sp.GetRequiredService<IOptions<OpenAIClientConfig>>().Value;
             client.Timeout = TimeSpan.FromSeconds(clientConfig.HttpTimeoutSeconds);
             client.BaseAddress = new(clientConfig.BaseUrl);
-            client.DefaultRequestHeaders.Add("api-key", clientConfig.ApiKey);
+            client.DefaultRequestHeaders.Authorization = new("Bearer", clientConfig.ApiKey);
         }).WithBackoff();
 
         return services;

@@ -26,7 +26,7 @@ public class OpenAIClientTests
         await client.CompleteChat<object>("1", new { });
 
         // Assert
-        fakeHttpClient.Calls[0].Key.Path.ShouldStartWith("chat/completions?api-version=");
+        fakeHttpClient.Calls[0].Key.Path.ShouldContain("chat/completions");
         fakeHttpClient.Dispose();
     }
 

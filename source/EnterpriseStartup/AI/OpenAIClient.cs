@@ -81,7 +81,7 @@ public class OpenAIClient(
         requestJson = requestJson.Replace("\"oneOf\":", "\"anyOf\":", CIComparison);
 
         using var request = new StringContent(requestJson, Encoding.UTF8, "application/json");
-        var uri = new Uri($"chat/completions?api-version={this.config.ApiVersion}", UriKind.Relative);
+        var uri = new Uri($"{this.config.ApiVersion}/chat/completions", UriKind.Relative);
         var response = await this.httpClient.PostAsync(uri, request, cancel);
         await response.MustBeOk();
 
