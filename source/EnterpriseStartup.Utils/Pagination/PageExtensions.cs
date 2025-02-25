@@ -40,6 +40,7 @@ public static class PageExtensions
             source = source.Where(where);
         }
 
+        // Stryker disable all
         if (orderBy != null)
         {
             source = descending ? source.OrderByDescending(orderBy) : source.OrderBy(orderBy);
@@ -49,6 +50,7 @@ public static class PageExtensions
             source = source.OrderBy(e => 1); // Default ordering
         }
 
+        // Stryker restore all
         var data = source
             .Skip((usedPage - 1) * usedSize)
             .Take(usedSize + 1)

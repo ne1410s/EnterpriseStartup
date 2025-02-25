@@ -66,4 +66,60 @@ public class PageExtensionsTests
         // Assert
         result.ShouldBeEquivalentTo(expected);
     }
+
+    [Fact]
+    public void LazyPageResult_MapFinal_ReturnsExpected()
+    {
+        // Arrange
+        var sut = new LazyPageResult<int>
+        {
+            PageNumber = 1,
+            PageSize = 3,
+            Data = [1, 2, 3],
+            HasMore = true,
+        };
+        var expected = new LazyPageResult<bool>
+        {
+            PageNumber = 1,
+            PageSize = 3,
+            Data = [false, true, false],
+            HasMore = true,
+        };
+
+        // Act
+        var result = sut.MapFinal(x => x % 2 == 0);
+
+        // Assert
+        result.ShouldBeEquivalentTo(expected);
+    }
+
+    [Fact]
+    public void PageResult_MapFinal_ReturnsExpected()
+    {
+        // Arrange
+        var sut = new PageResult<int>
+        {
+            PageNumber = 1,
+            PageSize = 3,
+            Data = [1, 2, 3],
+            HasMore = true,
+            TotalPages = 10,
+            TotalRecords = 30,
+        };
+        var expected = new PageResult<bool>
+        {
+            PageNumber = 1,
+            PageSize = 3,
+            Data = [false, true, false],
+            HasMore = true,
+            TotalPages = 10,
+            TotalRecords = 30,
+        };
+
+        // Act
+        var result = sut.MapFinal(x => x % 2 == 0);
+
+        // Assert
+        result.ShouldBeEquivalentTo(expected);
+    }
 }
