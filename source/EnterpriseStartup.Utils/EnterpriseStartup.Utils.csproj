@@ -17,7 +17,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <TargetFramework>net8.0</TargetFramework>
     <Title>$(AssemblyName)</Title>
-    <VersionPrefix>1.0.15</VersionPrefix>
+    <VersionPrefix>1.0.16</VersionPrefix>
   </PropertyGroup>
 
   <ItemGroup>
