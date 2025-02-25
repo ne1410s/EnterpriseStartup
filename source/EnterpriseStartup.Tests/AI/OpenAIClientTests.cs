@@ -130,7 +130,7 @@ public class OpenAIClientTests
         _ = await client.CompleteChat<ComplexResponse<string>>("1", userContent, CancellationToken.None);
 
         // Assert
-        _ = new ComplexResponse<int> { Email = "", Exer = 2 };
+        _ = new ComplexResponse<int> { Email = string.Empty, Exer = 2 };
         var sanitisedRequest = Regex.Replace(fakeHttpClient.Calls[0].Key.Body!, "\\s+", " ");
         sanitisedRequest.ShouldContain("\"anyOf\":");
         sanitisedRequest.ShouldContain("\"Email\": { \"type\": \"string\" },");

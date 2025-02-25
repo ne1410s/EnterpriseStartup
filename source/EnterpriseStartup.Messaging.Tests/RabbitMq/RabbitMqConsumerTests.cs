@@ -368,7 +368,7 @@ public class RabbitMqConsumerTests
         };
     }
 
-    private static T GetSut<T>(out BagOfMocks<T> mocks)
+    private static T GetSut<T>(out BagOfMocks mocks)
        where T : MqConsumerBase
     {
         mocks = new(
@@ -398,7 +398,7 @@ public class RabbitMqConsumerTests
             mockConnectionFactory.Object)!;
     }
 
-    private sealed record BagOfMocks<T>(
+    private sealed record BagOfMocks(
         Mock<IModel> MockChannel,
         Mock<IConnection> MockConnection,
         Mock<IBasicProperties> MockProperties);

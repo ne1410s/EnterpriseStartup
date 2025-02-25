@@ -20,6 +20,6 @@ public interface IAIChatCompleter
     /// <param name="input">The input object.</param>
     /// <param name="cancel">A cancellation token.</param>
     /// <returns>A response object containing the schema-bound reply.</returns>
-    Task<ChatResponse<T>> CompleteChat<T>(string prompt, object input, CancellationToken cancel = default)
+    Task<ChatResponse<T>> CompleteChat<T>(string prompt, object? input = null, CancellationToken cancel = default)
         where T : class;
 }

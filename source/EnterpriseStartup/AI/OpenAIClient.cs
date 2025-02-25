@@ -33,7 +33,8 @@ public class OpenAIClient(
     private readonly OpenAIClientConfig config = configOpts.Value;
 
     /// <inheritdoc/>
-    public async Task<ChatResponse<T>> CompleteChat<T>(string prompt, object input, CancellationToken cancel = default)
+    public async Task<ChatResponse<T>> CompleteChat<T>(
+        string prompt, object? input = null, CancellationToken cancel = default)
         where T : class
     {
         return await this.CompleteChatInternal<T>(prompt, input, cancel);
@@ -52,7 +53,7 @@ public class OpenAIClient(
     }
 
     private async Task<ChatResponse<T>> CompleteChatInternal<T>(
-        string prompt, object input, CancellationToken cancel = default)
+        string prompt, object? input, CancellationToken cancel)
         where T : class
     {
         var userJsonEscaped = JsonSerializer.Serialize(input).Replace("\"", "\\\"", CIComparison);
