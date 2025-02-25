@@ -32,6 +32,7 @@
     <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="8.0.*" />
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.*" />
     <PackageReference Include="AspNetCore.HealthChecks.SignalR" Version="9.0.*" />
+    <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="9.0.*" />
     <PackageReference Include="Fody" Version="6.9.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

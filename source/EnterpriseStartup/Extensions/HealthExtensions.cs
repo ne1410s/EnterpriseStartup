@@ -4,8 +4,11 @@
 
 namespace EnterpriseStartup.Extensions;
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -44,6 +47,34 @@ public static class HealthExtensions
         this IServiceCollection services)
     {
         return services.AddHealthChecks();
+    }
+
+    /// <summary>
+    /// Adds a HTTP healthcheck. Generally, a simple "ping" endpoint to infer
+    /// the liveness of the dependency should suffice. If you absolutely require
+    /// the HTTP dependency to function then you may wish to conduct a more
+    /// thorough test, such as a readiness probe where available, or else a
+    /// functional query similar to how your app would call it. (Just bear in
+    /// mind this needs to be called frequently, so should be something fast and
+    /// entirely non-destructive!.
+    /// </summary>
+    /// <param name="builder">The health check builder.</param>
+    /// <param name="probeUri">The uri to call.</param>
+    /// <param name="checkName">The name of the healthcheck.</param>
+    /// <param name="vital">Whether this is crucial to your application.</param>
+    /// <param name="tags">Specific tags on the healthcheck.</param>
+    /// <param name="configureClient">Optional http client configurer.</param>
+    /// <returns>The health check builder, for chainable calls.</returns>
+    public static IHealthChecksBuilder AddHttp(
+        this IHealthChecksBuilder builder,
+        Uri probeUri,
+        string checkName,
+        bool vital = true,
+        IEnumerable<string>? tags = null,
+        Action<IServiceProvider, HttpClient>? configureClient = null)
+    {
+        tags = vital ? [.. tags ?? []] : [NonVital, .. tags ?? []];
+        return builder.AddUrlGroup(probeUri, checkName, tags: tags, configureClient: configureClient);
     }
 
     /// <summary>
