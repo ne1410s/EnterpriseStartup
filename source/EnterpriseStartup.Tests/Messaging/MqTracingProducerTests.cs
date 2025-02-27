@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace EnterpriseStartup.Tests.Mq;
+namespace EnterpriseStartup.Tests.Messaging;
 
 using System.Diagnostics;
 using System.Text.Json;

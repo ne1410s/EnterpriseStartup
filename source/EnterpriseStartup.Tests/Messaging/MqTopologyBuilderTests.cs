@@ -2,13 +2,13 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
+namespace EnterpriseStartup.Tests.Messaging;
+
 using System.Diagnostics.CodeAnalysis;
 using EnterpriseStartup.Messaging;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
 using EnterpriseStartup.Messaging.Abstractions.Producer;
 using Microsoft.Extensions.DependencyInjection;
-
-namespace EnterpriseStartup.Tests.Mq;
 
 /// <summary>
 /// Tests for the <see cref="MqTopologyBuilder"/> class.
