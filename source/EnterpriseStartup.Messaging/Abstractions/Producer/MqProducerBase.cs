@@ -40,13 +40,14 @@ public abstract class MqProducerBase<T> : IMqProducer<T>
     public abstract string ExchangeName { get; }
 
     /// <inheritdoc/>
-    public void Produce(T message)
+    public Guid Produce(T message)
     {
         var json = JsonSerializer.Serialize(message, this.jsonOpts);
         var args = new MqEventArgs { Message = json };
         this.MessageSending?.Invoke(this, args);
-        this.ProduceInternal(Encoding.UTF8.GetBytes(json), args.Headers);
+        var id = this.ProduceInternal(Encoding.UTF8.GetBytes(json), args.Headers);
         this.MessageSent?.Invoke(this, args);
+        return id;
     }
 
     /// <summary>
@@ -54,5 +55,6 @@ public abstract class MqProducerBase<T> : IMqProducer<T>
     /// </summary>
     /// <param name="bytes">The message bytes.</param>
     /// <param name="headers">The initial headers.</param>
-    protected internal abstract void ProduceInternal(byte[] bytes, Dictionary<string, object> headers);
+    /// <returns>The correlation id.</returns>
+    protected internal abstract Guid ProduceInternal(byte[] bytes, Dictionary<string, object> headers);
 }

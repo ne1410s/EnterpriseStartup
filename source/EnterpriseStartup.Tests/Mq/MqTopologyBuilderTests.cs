@@ -77,6 +77,6 @@ public class FakeProducer : MqProducerBase<FakeMessage>
 
     public override bool IsConnected => true;
 
-    protected override void ProduceInternal(byte[] bytes, Dictionary<string, object> headers)
+    protected override Guid ProduceInternal(byte[] bytes, Dictionary<string, object> headers)
         => throw new NotImplementedException();
 }

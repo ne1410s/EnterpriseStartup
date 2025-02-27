@@ -30,16 +30,18 @@ public abstract class RabbitMqProducer<T>(IConnectionFactory connectionFactory) 
     }
 
     /// <inheritdoc/>
-    protected internal override void ProduceInternal(byte[] bytes, Dictionary<string, object> headers)
+    protected internal override Guid ProduceInternal(byte[] bytes, Dictionary<string, object> headers)
     {
         this.EnsureConnection();
         var props = this.channel!.CreateBasicProperties();
+        var id = Guid.NewGuid();
         props.Headers = headers;
         props.Headers["x-attempt"] = 1L;
         props.Headers["x-born"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        props.Headers["x-guid"] = Guid.NewGuid().ToByteArray();
+        props.Headers["x-guid"] = id.ToByteArray();
 
         this.channel.BasicPublish(this.ExchangeName, DefaultRoute, props, bytes);
+        return id;
     }
 
     private void EnsureConnection()

@@ -4,6 +4,8 @@
 
 namespace EnterpriseStartup.Messaging.Abstractions.Producer;
 
+using System;
+
 /// <summary>
 /// Produces mq messages.
 /// </summary>
@@ -30,5 +32,6 @@ public interface IMqProducer<in T> : IMqProducer
     /// Produces a message.
     /// </summary>
     /// <param name="message">The message.</param>
-    public void Produce(T message);
+    /// <returns>The correlation id.</returns>
+    public Guid Produce(T message);
 }
