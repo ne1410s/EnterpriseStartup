@@ -11,6 +11,6 @@ using Microsoft.AspNetCore.SignalR;
 public class SignalRNotifier(IHubContext<NotificationsHub> hubContext) : INotifier
 {
     /// <inheritdoc/>
-    public async Task Notify(string userId, Notice notice)
-        => await hubContext.Clients.Group(userId).SendAsync("ReceiveMessage", notice);
+    public async Task Notify(Notice notice, params string[] recipientIds)
+        => await hubContext.Clients.Groups(recipientIds).SendAsync("ReceiveMessage", notice);
 }

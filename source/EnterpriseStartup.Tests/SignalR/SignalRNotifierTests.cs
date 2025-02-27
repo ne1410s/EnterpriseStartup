@@ -21,7 +21,7 @@ public class SignalRNotifierTests
         object?[] expected = [notice];
 
         // Act
-        await sut.Notify("user1", notice);
+        await sut.Notify(notice, "user1");
 
         // Assert
         mockProxy.Verify(m => m.SendCoreAsync("ReceiveMessage", expected, It.IsAny<CancellationToken>()));
@@ -33,6 +33,7 @@ public class SignalRNotifierTests
         var mockHubClients = new Mock<IHubClients>();
         var mockHubContext = new Mock<IHubContext<NotificationsHub>>();
         mockHubClients.Setup(m => m.Group(It.IsAny<string>())).Returns(mockProxy.Object);
+        mockHubClients.Setup(m => m.Groups(It.IsAny<IReadOnlyList<string>>())).Returns(mockProxy.Object);
         mockHubContext.Setup(m => m.Clients).Returns(mockHubClients.Object);
         return new SignalRNotifier(mockHubContext.Object);
     }

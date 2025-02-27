@@ -4,6 +4,7 @@
 
 namespace EnterpriseStartup.SignalR;
 
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
@@ -11,12 +12,14 @@ using Microsoft.AspNetCore.SignalR;
 public class SignalRInMemNotifier(IHubContext<NotificationsHubInMem> hubContext) : INotifier
 {
     /// <inheritdoc/>
-    public async Task Notify(string userId, Notice notice)
+    public async Task Notify(Notice notice, params string[] recipientIds)
     {
-        if (NotificationsHubInMem.ConnectedUsers.TryGetValue(userId, out var connectionIds))
-        {
-            var proxy = hubContext.Clients.Clients(connectionIds);
-            await proxy.SendAsync("ReceiveMessage", notice);
-        }
+        var userList = recipientIds.ToList();
+        var allClientConnections = NotificationsHubInMem.ConnectedUsers
+            .Where(u => userList.Contains(u.Key))
+            .SelectMany(u => u.Value);
+
+        var proxy = hubContext.Clients.Clients(allClientConnections);
+        await proxy.SendAsync("ReceiveMessage", notice);
     }
 }

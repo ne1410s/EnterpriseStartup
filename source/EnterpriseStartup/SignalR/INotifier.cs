@@ -14,8 +14,8 @@ public interface INotifier
     /// <summary>
     /// Notifies a specific user, via SignalR.
     /// </summary>
-    /// <param name="userId">The user id.</param>
     /// <param name="notice">The notice.</param>
+    /// <param name="recipientIds">The recipient user ids.</param>
     /// <returns>Async task.</returns>
-    public Task Notify(string userId, Notice notice);
+    public Task Notify(Notice notice, params string[] recipientIds);
 }

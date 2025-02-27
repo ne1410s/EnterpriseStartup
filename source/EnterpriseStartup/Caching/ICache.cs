@@ -5,6 +5,7 @@
 namespace EnterpriseStartup.Caching;
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -35,6 +36,14 @@ public interface ICache
     /// <returns>The return, include an indicator whether an entry was found.
     /// This helps determine whether anything was actually stored.</returns>
     public Task<(bool found, T? value)> TryGetDirectly<T>(string key);
+
+    /// <summary>
+    /// Gets a series of values from the store. The values are retrieved via a common type.
+    /// </summary>
+    /// <typeparam name="T">The value type.</typeparam>
+    /// <param name="keys">The keys.</param>
+    /// <returns>Cache hits.</returns>
+    public Task<Dictionary<string, T>> TryGetManyDirectly<T>(params string[] keys);
 
     /// <summary>
     /// Sets a value direct to the store.

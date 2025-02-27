@@ -6,6 +6,8 @@ namespace EnterpriseStartup.Caching;
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -43,11 +45,25 @@ public class MemoryCache(ILogger<MemoryCache> logger) : ICache
     /// <inheritdoc/>
     public Task<(bool found, T? value)> TryGetDirectly<T>(string key)
     {
-        var retVal = !this.cache.TryGetValue(key, out var entry)
-            ? (false, default)
-            : (true, (T?)entry.Value);
+        var exists = this.cache.TryGetValue(key, out var entry);
+        if (exists && DateTimeOffset.UtcNow >= entry.Expiry)
+        {
+            this.RemoveDirectly(key);
+            exists = false;
+        }
 
-        return Task.FromResult(retVal);
+        return Task.FromResult(exists ? (true, (T?)entry.Value) : (false, default));
+    }
+
+    /// <inheritdoc/>
+    public Task<Dictionary<string, T>> TryGetManyDirectly<T>(params string[] keys)
+    {
+        var result = keys
+            .Select(k => new { key = k, fetch = this.TryGetDirectly<T>(k).Result })
+            .Where(k => k.fetch.found)
+            .ToDictionary(k => k.key, k => k.fetch.value!);
+
+        return Task.FromResult(result);
     }
 
     /// <inheritdoc/>

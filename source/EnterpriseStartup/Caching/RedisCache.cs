@@ -5,6 +5,8 @@
 namespace EnterpriseStartup.Caching;
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -77,9 +79,20 @@ public class RedisCache(ILogger<RedisCache> logger, IDatabase redis) : ICache
     public async Task<(bool found, T? value)> TryGetDirectly<T>(string key)
     {
         var value = await redis.StringGetAsync(key);
-        return !value.HasValue
+        return value.IsNull
             ? (false, default)
             : (true, JsonSerializer.Deserialize<T>(value!));
+    }
+
+    /// <inheritdoc/>
+    public async Task<Dictionary<string, T>> TryGetManyDirectly<T>(params string[] keys)
+    {
+        var redisKeys = keys.Select(k => (RedisKey)k).ToArray();
+        var redisValues = await redis.StringGetAsync(redisKeys);
+        return redisValues
+            .Select((r, i) => new { found = r.IsNull, value = r, i })
+            .Where(o => o.found)
+            .ToDictionary(o => keys[o.i], o => JsonSerializer.Deserialize<T>(o.value!)!);
     }
 
     /// <inheritdoc/>

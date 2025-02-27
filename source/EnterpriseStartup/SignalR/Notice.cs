@@ -4,11 +4,20 @@
 
 namespace EnterpriseStartup.SignalR;
 
+using System;
+using System.Collections.Generic;
+
 /// <summary>
 /// A notice.
 /// </summary>
 /// <param name="Level">The notice level.</param>
 /// <param name="Title">The title.</param>
 /// <param name="Text">The text.</param>
-/// <param name="Data">Any supporting data.</param>
-public record Notice(NoticeLevel Level, string Title, string Text, object? Data = null);
+/// <param name="CorrelationId">Correlation id, if known.</param>
+public record Notice(NoticeLevel Level, string Title, string Text, Guid? CorrelationId = null)
+{
+    /// <summary>
+    /// Gets any supporting metadata.
+    /// </summary>
+    public Dictionary<string, object> Metadata { get; init; } = [];
+}

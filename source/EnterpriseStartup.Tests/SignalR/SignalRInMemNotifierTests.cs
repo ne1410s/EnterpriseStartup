@@ -21,7 +21,7 @@ public class SignalRInMemNotifierTests
         object?[] expected = [notice];
 
         // Act
-        await sut.Notify("user1", notice);
+        await sut.Notify(notice, "user1");
 
         // Assert
         mockProxy.Verify(m => m.SendCoreAsync("ReceiveMessage", expected, It.IsAny<CancellationToken>()));
