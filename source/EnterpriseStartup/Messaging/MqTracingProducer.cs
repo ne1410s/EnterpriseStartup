@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace EnterpriseStartup.Mq;
+namespace EnterpriseStartup.Messaging;
 
 using System.Collections.Generic;
 using System.Diagnostics;

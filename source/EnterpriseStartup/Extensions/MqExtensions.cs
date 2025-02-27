@@ -4,7 +4,7 @@
 
 namespace EnterpriseStartup.Extensions;
 
-using EnterpriseStartup.Mq;
+using EnterpriseStartup.Messaging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;

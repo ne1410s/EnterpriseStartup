@@ -7,7 +7,7 @@ namespace EnterpriseStartup.Tests.Mq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
-using EnterpriseStartup.Mq;
+using EnterpriseStartup.Messaging;
 using EnterpriseStartup.Telemetry;
 using RabbitMQ.Client;
 
