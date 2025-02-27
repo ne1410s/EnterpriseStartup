@@ -92,7 +92,7 @@ public class RabbitMqConsumerTests
         // Assert
         argsReceived.BornOn.ShouldBe(epoch);
         argsReceived.AttemptNumber.ShouldBe(42L);
-        argsReceived.MessageGuid.ShouldBe(messageGuid);
+        argsReceived.CorrelationId.ShouldBe(messageGuid);
     }
 
     [Fact]
@@ -364,7 +364,7 @@ public class RabbitMqConsumerTests
             BornOn = 1,
             DeliveryId = 1,
             Message = "hi",
-            MessageGuid = Guid.NewGuid(),
+            CorrelationId = Guid.NewGuid(),
         };
     }
 

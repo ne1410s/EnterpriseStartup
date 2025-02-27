@@ -22,9 +22,9 @@ public class MqConsumerEventArgs : MqEventArgs
     public long AttemptNumber { get; init; }
 
     /// <summary>
-    /// Gets the message guid.
+    /// Gets the correlation id.
     /// </summary>
-    public Guid MessageGuid { get; init; }
+    public Guid CorrelationId { get; init; }
 
     /// <summary>
     /// Gets the delivery identifier.

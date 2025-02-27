@@ -150,7 +150,7 @@ public class MqConsumerBaseTests
             BornOn = 1,
             DeliveryId = 1,
             Message = message,
-            MessageGuid = Guid.NewGuid(),
+            CorrelationId = Guid.NewGuid(),
         };
     }
 }

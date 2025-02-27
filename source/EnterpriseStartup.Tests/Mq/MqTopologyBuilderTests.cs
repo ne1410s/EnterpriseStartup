@@ -3,9 +3,9 @@
 // </copyright>
 
 using System.Diagnostics.CodeAnalysis;
+using EnterpriseStartup.Messaging;
 using EnterpriseStartup.Messaging.Abstractions.Consumer;
 using EnterpriseStartup.Messaging.Abstractions.Producer;
-using EnterpriseStartup.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EnterpriseStartup.Tests.Mq;

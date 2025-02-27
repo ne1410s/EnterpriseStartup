@@ -268,7 +268,7 @@ public class MqTracingConsumerTests
             BornOn = born,
             DeliveryId = deliveryId,
             Message = message,
-            MessageGuid = guid,
+            CorrelationId = guid,
         };
 
     private static MqFailedEventArgs GetErrorArgs(
@@ -286,7 +286,7 @@ public class MqTracingConsumerTests
             BornOn = born,
             DeliveryId = deliveryId,
             Message = message,
-            MessageGuid = guid,
+            CorrelationId = guid,
         };
 
     private static T GetSut<T>(

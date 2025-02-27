@@ -96,7 +96,7 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
         var headers = args.BasicProperties.Headers ?? new Dictionary<string, object>();
         var attempt = headers.TryGetValue("x-attempt", out var attemptObj) ? (long?)attemptObj : null;
         var bornOn = headers.TryGetValue("x-born", out var bornObj) ? (long?)bornObj : null;
-        var msgGuid = headers.TryGetValue("x-guid", out var guidObj) ? new Guid((byte[])guidObj) : Guid.NewGuid();
+        var id = headers.TryGetValue("x-guid", out var guidObj) ? new Guid((byte[])guidObj) : Guid.NewGuid();
 
         var bytes = args.Body.ToArray();
         var consumerArgs = new MqConsumerEventArgs
@@ -104,7 +104,7 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
             AttemptNumber = attempt ?? 1,
             BornOn = bornOn ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             DeliveryId = args.DeliveryTag,
-            MessageGuid = msgGuid,
+            CorrelationId = id,
             Message = Encoding.UTF8.GetString(bytes),
             Headers = (Dictionary<string, object>)headers,
         };
@@ -137,7 +137,7 @@ public abstract class RabbitMqConsumer<T> : MqConsumerBase<T>, IDisposable
             {
                 ["x-attempt"] = args.AttemptNumber + 1,
                 ["x-born"] = args.BornOn,
-                ["x-guid"] = args.MessageGuid.ToByteArray(),
+                ["x-guid"] = args.CorrelationId.ToByteArray(),
             };
 
             this.channel.BasicAck(deliveryTag, false);
