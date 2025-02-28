@@ -68,7 +68,7 @@ public static class AuthExtensions
         string configSection = "JWTAuth")
     {
         var section = configuration.MustExist().GetSection(configSection);
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(section["IssuerKey"]!));
+        var key = new SymmetricSecurityKey(Convert.FromBase64String(section["IssuerKey"]!));
         var policyName = section["PolicyName"] ?? "EnterpriseJWT";
         var schemeName = $"{policyName}_Scheme";
 
