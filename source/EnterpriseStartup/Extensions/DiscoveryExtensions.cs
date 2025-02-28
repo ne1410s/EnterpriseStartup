@@ -20,31 +20,35 @@ public static class DiscoveryExtensions
     /// Adds the enterprise discovery feature.
     /// </summary>
     /// <param name="services">The services.</param>
+    /// <param name="requireAuth">Whether to require auth on swagger endpoints.</param>
     /// <returns>The original parameter, for chainable commands.</returns>
     public static IServiceCollection AddEnterpriseDiscovery(
-        this IServiceCollection services)
+        this IServiceCollection services, bool requireAuth = true)
     {
         return services
             .AddEndpointsApiExplorer()
             .AddSwaggerGen(setup =>
             {
-                var jwtSecurityScheme = new OpenApiSecurityScheme
+                if (requireAuth)
                 {
-                    BearerFormat = "JWT",
-                    Name = "JWT Authentication",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http,
-                    Scheme = JwtBearerDefaults.AuthenticationScheme,
-                    Description = "Put **_ONLY_** your JWT Bearer token on textbox below!",
-                    Reference = new()
+                    var jwtSecurityScheme = new OpenApiSecurityScheme
                     {
-                        Id = JwtBearerDefaults.AuthenticationScheme,
-                        Type = ReferenceType.SecurityScheme,
-                    },
-                };
+                        BearerFormat = "JWT",
+                        Name = "JWT Authentication",
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.Http,
+                        Scheme = JwtBearerDefaults.AuthenticationScheme,
+                        Description = "Put **_ONLY_** your JWT Bearer token on textbox below!",
+                        Reference = new()
+                        {
+                            Id = JwtBearerDefaults.AuthenticationScheme,
+                            Type = ReferenceType.SecurityScheme,
+                        },
+                    };
 
-                setup.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
-                setup.AddSecurityRequirement(new() { { jwtSecurityScheme, [] } });
+                    setup.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+                    setup.AddSecurityRequirement(new() { { jwtSecurityScheme, [] } });
+                }
             });
     }
 
