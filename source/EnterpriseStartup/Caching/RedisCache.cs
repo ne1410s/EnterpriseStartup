@@ -90,7 +90,7 @@ public class RedisCache(ILogger<RedisCache> logger, IDatabase redis) : ICache
         var redisKeys = keys.Select(k => (RedisKey)k).ToArray();
         var redisValues = await redis.StringGetAsync(redisKeys);
         return redisValues
-            .Select((r, i) => new { found = r.IsNull, value = r, i })
+            .Select((r, i) => new { found = !r.IsNull, value = r, i })
             .Where(o => o.found)
             .ToDictionary(o => keys[o.i], o => JsonSerializer.Deserialize<T>(o.value!)!);
     }

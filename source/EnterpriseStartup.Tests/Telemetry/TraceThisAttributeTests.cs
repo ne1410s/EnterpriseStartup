@@ -88,16 +88,16 @@ public class TraceThisAttributeTests
     }
 
     [Fact]
-    public void OnException_NullArg_ThrowsException()
+    public void OnException_NullArg_DoesNotThrow()
     {
         // Arrange
-        using var sut = new TraceThisAttribute();
+        using var sut = GetSut(out _);
 
         // Act
         var act = () => sut.OnException(null!);
 
         // Assert
-        act.ShouldThrow<ArgumentNullException>().ParamName.ShouldBe("arg");
+        act.ShouldNotThrow();
     }
 
     [Fact]

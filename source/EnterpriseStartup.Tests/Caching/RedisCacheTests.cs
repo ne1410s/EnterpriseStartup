@@ -173,6 +173,23 @@ public class RedisCacheTests
     }
 
     [Fact]
+    public async Task TryGetManyDirectly_IsFound_ReturnsValue()
+    {
+        // Arrange
+        var sut = GetSut(out _, out var mockRedis);
+        const int expected = 42;
+        mockRedis.Setup(m => m.StringGetAsync(It.IsAny<RedisKey[]>(), CommandFlags.None))
+            .ReturnsAsync([new RedisValue(JsonSerializer.Serialize(expected))]);
+
+        // Act
+        var values = await sut.TryGetManyDirectly<int>("myKey", "nada");
+
+        // Assert
+        values.Count.ShouldBe(1);
+        values["myKey"].ShouldBe(expected);
+    }
+
+    [Fact]
     public async Task RemoveDirectly_WhenCalled_CallsInnerRemove()
     {
         // Arrange

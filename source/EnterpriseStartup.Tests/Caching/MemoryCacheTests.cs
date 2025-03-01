@@ -135,6 +135,22 @@ public class MemoryCacheTests
         actual.ShouldBe(expected);
     }
 
+    [Fact]
+    public async Task TryGetManyDirectly_IsFound_ReturnsValue()
+    {
+        // Arrange
+        var sut = GetSut(out _);
+        const int expected = 42;
+        await sut.SetDirectly("myKey", expected);
+
+        // Act
+        var values = await sut.TryGetManyDirectly<int>("myKey", "nada");
+
+        // Assert
+        values.Count.ShouldBe(1);
+        values["myKey"].ShouldBe(expected);
+    }
+
     private static MemoryCache GetSut(out Mock<ILogger<MemoryCache>> mockLogger)
     {
         mockLogger = new Mock<ILogger<MemoryCache>>();
