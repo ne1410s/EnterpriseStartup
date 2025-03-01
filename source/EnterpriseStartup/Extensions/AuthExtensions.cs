@@ -6,7 +6,6 @@ namespace EnterpriseStartup.Extensions;
 
 using System;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using FluentErrors.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
