@@ -52,23 +52,14 @@ public sealed class TraceThisAttribute : OnMethodBoundaryAspect, IDisposable
 
     /// <inheritdoc/>
     [ExcludeFromCodeCoverage]
-    public override async void OnExit(MethodExecutionArgs arg)
+    public override void OnExit(MethodExecutionArgs arg)
     {
-        try
+        if (arg?.ReturnValue is Task task)
         {
-            if (arg?.ReturnValue is Task task)
-            {
-                await task;
-            }
+            _ = task.ContinueWith(t => this.Dispose(), TaskScheduler.Current);
         }
-        catch (Exception ex)
+        else
         {
-            Trace.TraceError($"OnExit encountered an error: {ex}");
-            throw;  // Rethrow to preserve debugging info
-        }
-        finally
-        {
-            await Task.Delay(50);  // Small delay before disposal
             this.Dispose();
         }
     }
@@ -77,21 +68,24 @@ public sealed class TraceThisAttribute : OnMethodBoundaryAspect, IDisposable
     [DebuggerNonUserCode]
     public override void OnException(MethodExecutionArgs arg)
     {
-        var ex = arg?.Exception ?? throw new ArgumentNullException(nameof(arg));
-        var tags = new ActivityTagsCollection
+        if (arg?.Exception != null)
         {
-            ["type"] = ex.GetType().Name,
-            ["message"] = ex.Message,
-        };
+            var ex = arg.Exception;
+            var tags = new ActivityTagsCollection
+            {
+                ["type"] = ex.GetType().Name,
+                ["message"] = ex.Message,
+            };
 
-        if (ex.InnerException != null)
-        {
-            tags.Add("innerType", ex.InnerException.GetType().Name);
-            tags.Add("innerMessage", ex.InnerException.Message);
+            if (ex.InnerException != null)
+            {
+                tags.Add("innerType", ex.InnerException.GetType().Name);
+                tags.Add("innerMessage", ex.InnerException.Message);
+            }
+
+            this.Activity?.AddEvent(new("exception", tags: tags));
+            this.Dispose();
         }
-
-        this.Activity?.AddEvent(new("exception", tags: tags));
-        this.Dispose();
     }
 
     /// <inheritdoc/>

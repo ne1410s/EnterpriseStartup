@@ -3,6 +3,8 @@
   <PropertyGroup>
     <Authors>Paul Jones</Authors>
     <Company>ne1410s</Company>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
     <Description>Provides common extensions aimed at the ASP.NET startup routine.</Description>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <IncludeSymbols>True</IncludeSymbols>
