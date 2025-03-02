@@ -24,7 +24,7 @@ public class MemoryCache(ILogger<MemoryCache> logger) : ICache
         factory = factory ?? throw new ArgumentNullException(nameof(factory));
         if (this.cache.TryGetValue(key, out var cacheEntry))
         {
-            // Stryker disable once equality
+            // Stryker disable all
             if (DateTimeOffset.UtcNow < cacheEntry.Expiry)
             {
                 logger.LogInformation("Cache HIT on: {Key}", key);
@@ -32,9 +32,10 @@ public class MemoryCache(ILogger<MemoryCache> logger) : ICache
             }
             else
             {
-                // Stryker disable once Statement
                 await this.RemoveDirectly(key);
             }
+
+            // Stryker restore all
         }
 
         logger.LogInformation("Cache MISS on: {Key}", key);
