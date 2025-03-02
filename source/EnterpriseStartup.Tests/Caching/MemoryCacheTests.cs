@@ -102,6 +102,7 @@ public class MemoryCacheTests
 
         // Assert
         found.ShouldBeFalse();
+        (await sut.RemoveDirectly("myKey")).ShouldBeFalse();
     }
 
     [Fact]
@@ -133,6 +134,23 @@ public class MemoryCacheTests
         // Assert
         found.ShouldBeTrue();
         actual.ShouldBe(expected);
+    }
+
+    [Fact]
+    public async Task TryGetDirectly_IsExpired_RemovesValue()
+    {
+        // Arrange
+        var sut = GetSut(out _);
+        await sut.SetDirectly("myKey", 42, TimeSpan.Zero);
+
+        // Act
+        await Task.Delay(50);
+        var (found, actual) = await sut.TryGetDirectly<int>("myKey");
+
+        // Assert
+        found.ShouldBeFalse();
+        actual.ShouldBe(0);
+        (await sut.RemoveDirectly("myKey")).ShouldBeFalse();
     }
 
     [Fact]

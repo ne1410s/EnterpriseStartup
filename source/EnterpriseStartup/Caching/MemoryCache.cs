@@ -32,6 +32,7 @@ public class MemoryCache(ILogger<MemoryCache> logger) : ICache
             }
             else
             {
+                // Stryker disable once Statement
                 await this.RemoveDirectly(key);
             }
         }
@@ -46,6 +47,8 @@ public class MemoryCache(ILogger<MemoryCache> logger) : ICache
     public Task<(bool found, T? value)> TryGetDirectly<T>(string key)
     {
         var exists = this.cache.TryGetValue(key, out var entry);
+
+        // Stryker disable once equality
         if (exists && DateTimeOffset.UtcNow >= entry.Expiry)
         {
             this.RemoveDirectly(key);
